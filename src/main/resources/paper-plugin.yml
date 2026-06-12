@@ -1,0 +1,7 @@
+name: MadnessCup
+version: '1.0-SNAPSHOT'
+main: Coocos.madnessCup.MadnessCup
+api-version: '1.21'
+load: STARTUP
+authors: [ Gabriel Ferreri ]
+description: MadnessCup Plugin
