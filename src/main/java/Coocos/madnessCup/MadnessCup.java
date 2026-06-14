@@ -2,7 +2,7 @@ package Coocos.madnessCup;
 
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
-import static org.bukkit.ChatColor.*;
+import org.bukkit.ChatColor;
 
 public final class MadnessCup extends JavaPlugin {
 
@@ -11,7 +11,7 @@ public final class MadnessCup extends JavaPlugin {
         // Plugin startup logic
 
         ConsoleCommandSender console = getServer().getConsoleSender();
-        console.sendMessage(GREEN + "MadnessCup Plugin Enabled");
+        console.sendMessage(ChatColor.GREEN + "MadnessCup Plugin Enabled");
     }
 
     @Override
@@ -19,6 +19,6 @@ public final class MadnessCup extends JavaPlugin {
         // Plugin shutdown logic
 
         ConsoleCommandSender console = getServer().getConsoleSender();
-        console.sendMessage(RED + "MadnessCup Plugin Disabled");
+        console.sendMessage(ChatColor.RED + "MadnessCup Plugin Disabled");
     }
 }

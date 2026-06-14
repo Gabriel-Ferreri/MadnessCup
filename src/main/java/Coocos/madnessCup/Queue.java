@@ -1,27 +1,37 @@
 package Coocos.madnessCup;
 
 public class Queue {
-    private int max_capacity;
-    private int min_capacity;
+    private int maxCapacity;
+    private int minCapacity;
+    private int currentCapacity;
 
     public Queue() {
-        this.max_capacity = 8;
-        this.min_capacity = 2;
+        this.maxCapacity = 8;
+        this.minCapacity = 2;
+        this.currentCapacity = 0;
     }
 
-    public int getMin_capacity() {
-        return min_capacity;
+    public int getMinCapacity() {
+        return minCapacity;
     }
-    public int getMax_capacity() {
-        return max_capacity;
+    public int getMaxCapacity() {
+        return maxCapacity;
     }
-    public void setMin_capacity(int min_capacity) {
-        if (min_capacity <= this.max_capacity && min_capacity > 1)
-            this.min_capacity = min_capacity;
+    public int getCurrentCapacity() {
+        return currentCapacity;
     }
 
-    public void setMax_capacity(int max_capacity) {
-        if (max_capacity > 1 && max_capacity > min_capacity)
-            this.max_capacity = max_capacity;
+    public void setMinCapacity(int minCapacity) {
+        if (minCapacity <= this.maxCapacity && minCapacity > 1)
+            this.minCapacity = minCapacity;
+    }
+
+    public void setMaxCapacity(int max_capacity) {
+        if (maxCapacity > 1 && max_capacity > minCapacity)
+            this.maxCapacity = max_capacity;
+    }
+
+    public void setCurrentCapacity(int current_capacity) {
+        this.currentCapacity = current_capacity;
     }
 }
