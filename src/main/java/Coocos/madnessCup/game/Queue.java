@@ -6,15 +6,22 @@ import java.util.UUID;
 public class Queue {
     private Game game;
     private List<UUID> players;
+    private int minCapacity, maxCapacity, currentCapacity;
 
-    public Queue(Game game, List<UUID> players) {
+    public Queue(Game game, List<UUID> players, int minCapacity, int maxCapacity, int currentCapacity) {
         this.game = game;
         this.players = players;
+        this.minCapacity = minCapacity;
+        this.maxCapacity = maxCapacity;
+        this.currentCapacity = currentCapacity;
     }
 
     public Game getGame() {
         return this.game;
     }
     public List<UUID> getPlayers() { return this.players; }
+    public int getMinCapacity() { return this.minCapacity; }
+    public int getMaxCapacity() { return this.maxCapacity; }
+    public int getCurrentCapacity() { return this.currentCapacity; }
 
 }
