@@ -35,5 +35,4 @@ public class Queue {
         else return;
     }
     public void setCurrentCapacity(int currentCapacity) { this.currentCapacity = currentCapacity; }
-
 }

@@ -21,6 +21,10 @@ public class Countdown {
         this.seconds = seconds;
     }
 
+    public void onFinish() {
+        Bukkit.broadcastMessage(ChatColor.BOLD + "COUNTDOWN FINISHED");
+    }
+
     public void start() {
 
         new BukkitRunnable() {
@@ -43,6 +47,7 @@ public class Countdown {
                         if (p != null)
                             p.sendMessage(ChatColor.GOLD + "Game started!");
                     }
+                    onFinish();
                     cancel();
                 }
             }

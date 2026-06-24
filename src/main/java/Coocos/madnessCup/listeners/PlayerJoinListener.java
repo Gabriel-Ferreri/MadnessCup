@@ -1,6 +1,11 @@
 package Coocos.madnessCup.listeners;
 
+import Coocos.madnessCup.MadnessCup;
+import Coocos.madnessCup.game.Game;
+import Coocos.madnessCup.game.Queue;
+import Coocos.madnessCup.game.games.ReincarnationBattle;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,6 +13,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -15,8 +22,15 @@ import java.util.Random;
  */
 public class PlayerJoinListener implements Listener {
 
+    private final MadnessCup plugin;
+
+    public PlayerJoinListener(MadnessCup plugin) {
+        this.plugin = plugin;
+    }
+
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        event.setJoinMessage(null);
         Player player = event.getPlayer();
         player.setGameMode(GameMode.ADVENTURE);
         Random random = new Random();
@@ -30,7 +44,11 @@ public class PlayerJoinListener implements Listener {
         };
 
         int index = random.nextInt(MESSAGES.length);
-        Bukkit.broadcastMessage(MESSAGES[index]);
+        Bukkit.broadcastMessage(ChatColor.YELLOW + MESSAGES[index]);
+
+        Game game = new ReincarnationBattle( this.plugin, new ArrayList<>(), false);
+        game.addPlayer(player.getUniqueId());
+        game.startGame();
     }
 
     @EventHandler

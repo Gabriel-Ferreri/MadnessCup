@@ -1,9 +1,14 @@
 package Coocos.madnessCup;
 
+import Coocos.madnessCup.game.Game;
+import Coocos.madnessCup.game.Queue;
+import Coocos.madnessCup.game.games.ReincarnationBattle;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
+
+import java.util.Collections;
 
 public final class MadnessCup extends JavaPlugin {
 
@@ -15,7 +20,7 @@ public final class MadnessCup extends JavaPlugin {
         console.sendMessage(ChatColor.GREEN + "MadnessCup Plugin Enabled");
 
         //Event Listeners
-        getServer().getPluginManager().registerEvents(new PlayerJoinListener(), this);
+        getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
     }
 
     @Override
