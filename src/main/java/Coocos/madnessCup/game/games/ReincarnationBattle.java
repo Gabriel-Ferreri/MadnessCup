@@ -24,7 +24,7 @@ public class ReincarnationBattle extends Game {
             @Override
             public void onFinish() {
                 Location gameLocation = new Location(
-                        Bukkit.getWorld("world"), 9.5, -57, -10.5, 0, 0);
+                        Bukkit.getWorld("game"), 9.5, -57, -10.5, 0, 0);
 
                 for (UUID uuid : players) {
                     Player p = Bukkit.getPlayer(uuid);
