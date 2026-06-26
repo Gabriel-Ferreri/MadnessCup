@@ -1,19 +1,19 @@
 package Coocos.madnessCup.utils;
 
 import Coocos.madnessCup.MadnessCup;
-import org.bukkit.ChatColor;
+import Coocos.madnessCup.game.Queue;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 public class MenuHandler implements Listener {
     private final MadnessCup plugin;
@@ -31,29 +31,78 @@ public class MenuHandler implements Listener {
     }
 
     @EventHandler
-    public void onDrop(PlayerDropItemEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        defaultInventory(player);
+    }
+
+    @EventHandler
+    public void onPlayerDrop(PlayerDropItemEvent event) { event.setCancelled(true); }
+
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        handleMenuItem(event.getPlayer(), event.getItem());
         event.setCancelled(true);
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-        Inventory menu = player.getInventory();
-        menu.setItem(8, new ItemStack(Material.PAPER));
+    public void onInventoryClick(InventoryClickEvent event) {
+        ItemStack clicked = event.getCurrentItem();
+        handleMenuItem((Player) event.getWhoClicked(), clicked);
+        event.setCancelled(true);
     }
 
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        Player player = event.getWhoClicked() instanceof Player ? (Player) event.getWhoClicked() : null;
-        if (player != null) return;
+    private void handleMenuItem(Player player, ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return;
 
-        String title = event.getView().getTitle();
-        ItemStack clicked = event.getCurrentItem();
-        if (clicked == null || clicked.getType() == Material.AIR) return;
+        ItemMeta meta = item.getItemMeta();
+        if (meta == null) return;
 
-        // Queue Menu
-        if (clicked.getType() == Material.PAPER) {
-            return;
+        String key = meta.getPersistentDataContainer().get(
+                ItemFactory.KEY_MENU,
+                PersistentDataType.STRING);
+
+        if (key == null) return;
+
+        Queue queue = plugin.getQueueManager().getQueue("reincarnation1");
+
+        switch (key) {
+            case "play":
+                openQueueInventory(player);
+                break;
+
+            case "join":
+                queue.addPlayer(player.getUniqueId());
+                queueStart(player);
+                player.closeInventory();
+                break;
+
+            case "leave":
+                queue.removePlayer(player.getUniqueId());
+                defaultInventory(player);
+                player.closeInventory();
+                break;
+
+            default:
+                break;
         }
+    }
+
+    public void defaultInventory(Player player) {
+        Inventory inv = player.getInventory();
+        inv.clear();
+        inv.setItem(8, ItemFactory.createPaper("Play","Check out what games are available", "play"));
+    }
+
+    public void openQueueInventory(Player player) {
+        Inventory inv = Bukkit.createInventory(null, 27,"Reincarnation Battle Queues");
+        inv.setItem(0, ItemFactory.createPaper("Join Queue","", "join"));
+        player.openInventory(inv);
+    }
+
+    public void queueStart(Player player) {
+        Inventory inv = player.getInventory();
+        inv.clear();
+        inv.setItem(4, ItemFactory.createPaper("Leave Queue","Press to leave the queue", "leave"));
     }
 }

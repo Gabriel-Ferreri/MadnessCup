@@ -1,14 +1,23 @@
 package Coocos.madnessCup;
 
+import Coocos.madnessCup.game.Game;
+import Coocos.madnessCup.game.Queue;
+import Coocos.madnessCup.game.games.ReincarnationBattle;
+import Coocos.madnessCup.game.other.QueueManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
+import Coocos.madnessCup.utils.ItemFactory;
+import Coocos.madnessCup.utils.MenuHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 
+import java.util.ArrayList;
+
 
 public final class MadnessCup extends JavaPlugin {
+    private QueueManager queueManager;
 
     @Override
     public void onEnable() {
@@ -20,8 +29,16 @@ public final class MadnessCup extends JavaPlugin {
         Bukkit.getScheduler().runTask(this, () -> {
             new WorldCreator("game").createWorld();
         });
+        ItemFactory.init(this);
+        queueManager = new QueueManager();
+
+        Game reincarnation = new ReincarnationBattle(this, new ArrayList<>(), false);
+        Queue reincarnationQueue = new Queue(this, reincarnation, new ArrayList<>(), 1, 3, 0);
+        queueManager.registerQueue("reincarnation1", reincarnationQueue);
+
         //Event Listeners
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
+        getServer().getPluginManager().registerEvents(new MenuHandler(this), this);
     }
 
     @Override
@@ -30,5 +47,9 @@ public final class MadnessCup extends JavaPlugin {
 
         ConsoleCommandSender console = getServer().getConsoleSender();
         console.sendMessage(ChatColor.RED + "MadnessCup Plugin Disabled");
+    }
+
+    public QueueManager getQueueManager() {
+        return queueManager;
     }
 }

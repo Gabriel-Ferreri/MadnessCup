@@ -7,10 +7,13 @@ import Coocos.madnessCup.game.games.ReincarnationBattle;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.Inventory;
 
@@ -34,7 +37,10 @@ public class PlayerJoinListener implements Listener {
         player.setGameMode(GameMode.ADVENTURE);
         Random random = new Random();
         String playerName = player.getName();
-
+        player.setFoodLevel(20);
+        Location gameLocation = new Location(
+                Bukkit.getWorld("World"), 8.5, -56, 8.5, 0, 0);
+        player.teleport(gameLocation);
         String[] MESSAGES = {
                 playerName + " is ready for trouble!",
                 "Have no fear " + playerName + " is here!",
@@ -48,8 +54,19 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player) {
+        if (event.getEntity() instanceof Player)
             event.setCancelled(true);
-        }
     }
+
+    @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onItemSpawn(ItemSpawnEvent event) {
+        event.getEntity().remove();
+    }
+
+
 }
