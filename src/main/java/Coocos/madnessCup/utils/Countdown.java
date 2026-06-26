@@ -10,10 +10,10 @@ import java.util.List;
 import java.util.UUID;
 
 public class Countdown {
-
     private final JavaPlugin plugin;
     private final List<UUID> players;
     private int seconds;
+    private BukkitRunnable task;
 
     public Countdown(JavaPlugin plugin, List<UUID> players, int seconds) {
         this.plugin = plugin;
@@ -22,28 +22,27 @@ public class Countdown {
     }
 
     public void onFinish() {
-        Bukkit.broadcastMessage(ChatColor.BOLD + "COUNTDOWN FINISHED");
+        for (UUID uuid : players) {
+            Player p = Bukkit.getPlayer(uuid);
+            if (p != null)
+                p.sendMessage(ChatColor.RED + "Countdown finished!");
+        }
     }
 
     public void start() {
-
-        new BukkitRunnable() {
+        task = new BukkitRunnable() {
             @Override
             public void run() {
                 if (seconds > 0) {
                     for (UUID uuid : players) {
                         Player p = Bukkit.getPlayer(uuid);
-
                         if (p != null)
                             p.sendMessage(ChatColor.GOLD + "Starting in " + seconds + "...");
                     }
                     seconds--;
-
-                }
-                else {
+                } else {
                     for (UUID uuid : players) {
                         Player p = Bukkit.getPlayer(uuid);
-
                         if (p != null)
                             p.sendMessage(ChatColor.GOLD + "Game started!");
                     }
@@ -51,6 +50,18 @@ public class Countdown {
                     cancel();
                 }
             }
-        }.runTaskTimer(plugin, 0L, 20L);
+        };
+        task.runTaskTimer(plugin, 0L, 20L);
+    }
+
+    public void cancel() {
+        if (task != null) {
+            task.cancel();
+            for (UUID uuid : players) {
+                Player p = Bukkit.getPlayer(uuid);
+                if (p != null)
+                    p.sendMessage(ChatColor.RED + "Countdown cancelled!");
+            }
+        }
     }
 }

@@ -12,9 +12,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Inventory;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Random;
 
 /**
@@ -45,10 +44,6 @@ public class PlayerJoinListener implements Listener {
 
         int index = random.nextInt(MESSAGES.length);
         Bukkit.broadcastMessage(ChatColor.YELLOW + MESSAGES[index]);
-
-        Game game = new ReincarnationBattle( this.plugin, new ArrayList<>(), false);
-        game.addPlayer(player.getUniqueId());
-        game.startGame();
     }
 
     @EventHandler
