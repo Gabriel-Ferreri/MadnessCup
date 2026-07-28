@@ -21,6 +21,7 @@ public class QueueManager {
     }
 
     public Collection<Queue> getAllQueues() {
+        // Maps return Collections
         return queues.values();
     }
 }

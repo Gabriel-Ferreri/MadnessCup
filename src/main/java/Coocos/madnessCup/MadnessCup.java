@@ -4,6 +4,7 @@ import Coocos.madnessCup.game.Game;
 import Coocos.madnessCup.game.Queue;
 import Coocos.madnessCup.game.games.ReincarnationBattle;
 import Coocos.madnessCup.game.other.QueueManager;
+import Coocos.madnessCup.game.other.TeamManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
 import Coocos.madnessCup.utils.ItemFactory;
 import Coocos.madnessCup.utils.MenuHandler;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
  */
 public final class MadnessCup extends JavaPlugin {
     private QueueManager queueManager;
+    private TeamManager teamManager;
 
     @Override
     public void onEnable() {
@@ -38,6 +40,8 @@ public final class MadnessCup extends JavaPlugin {
         Queue reincarnationQueue = new Queue(this, reincarnation, new ArrayList<>(), 1, 3, 0);
         queueManager.registerQueue("reincarnation1", reincarnationQueue);
 
+        teamManager = new TeamManager();
+
         //Event Listeners
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new MenuHandler(this), this);
@@ -53,5 +57,9 @@ public final class MadnessCup extends JavaPlugin {
 
     public QueueManager getQueueManager() {
         return queueManager;
+    }
+
+    public TeamManager getTeamManager() {
+        return teamManager;
     }
 }
