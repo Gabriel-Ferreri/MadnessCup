@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Queue manager to associate a unique string to each queue
+ */
 public class QueueManager {
     private final Map<String, Queue> queues = new HashMap<>();
 

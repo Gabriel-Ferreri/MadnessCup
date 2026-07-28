@@ -10,6 +10,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
 
+/**
+ * ItemFactory class to create papers for inventory use with name, lore and key
+ */
 public class ItemFactory {
     public static NamespacedKey KEY_MENU;
 

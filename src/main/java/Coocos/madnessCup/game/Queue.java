@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Queue class to organize queues before starting a game
+ */
 public class Queue {
     private Game game;
     private List<UUID> players;

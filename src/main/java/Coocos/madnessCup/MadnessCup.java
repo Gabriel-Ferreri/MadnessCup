@@ -15,7 +15,9 @@ import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
 
-
+/**
+ * Main class for plugin starting logic implementation
+ */
 public final class MadnessCup extends JavaPlugin {
     private QueueManager queueManager;
 

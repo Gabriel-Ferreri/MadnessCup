@@ -9,6 +9,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Countdown class to create countdowns dynamically for queues and possibly more.
+ */
 public class Countdown {
     private final JavaPlugin plugin;
     private final List<UUID> players;

@@ -44,7 +44,7 @@ public class PlayerJoinListener implements Listener {
         String[] MESSAGES = {
                 playerName + " is ready for trouble!",
                 "Have no fear " + playerName + " is here!",
-                "How much wood could " + playerName + " chuck if " + playerName + " could chuck wood?",
+                "How much wood would " + playerName + " chuck if " + playerName + " could chuck wood?",
                 playerName + " is here! With good intentions hopefully.",
         };
 

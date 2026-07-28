@@ -15,6 +15,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+/**
+ * MenuHandler class to prevent players from moving stuff around in their
+ * inventory and to manage the necessary papers with commands
+ */
 public class MenuHandler implements Listener {
     private final MadnessCup plugin;
 
