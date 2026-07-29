@@ -2,7 +2,6 @@ package Coocos.madnessCup.game.games;
 
 import Coocos.madnessCup.MadnessCup;
 import Coocos.madnessCup.game.Game;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -14,7 +13,6 @@ public class ReincarnationBattle extends Game {
     @Override
     public void startGame() {
         this.isRunning = true;
-
     }
 
 
