@@ -4,6 +4,7 @@ import Coocos.madnessCup.game.Game;
 import Coocos.madnessCup.game.Queue;
 import Coocos.madnessCup.game.Team;
 import Coocos.madnessCup.game.games.ReincarnationBattle;
+import Coocos.madnessCup.game.other.PlayerManager;
 import Coocos.madnessCup.game.other.QueueManager;
 import Coocos.madnessCup.game.other.TeamManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
@@ -25,6 +26,7 @@ import java.util.Collections;
 public final class MadnessCup extends JavaPlugin {
     private QueueManager queueManager;
     private TeamManager teamManager;
+    private PlayerManager playerManager;
 
     @Override
     public void onEnable() {
@@ -52,9 +54,12 @@ public final class MadnessCup extends JavaPlugin {
         Team limeTeam = new Team(this, Collections.emptyList(), "Lime Nerds", Color.LIME, 0, 4);
 
         teamManager.addTeam(redTeam.getTeamName(), redTeam);
-        teamManager.addTeam(redTeam.getTeamName(), orangeTeam);
-        teamManager.addTeam(redTeam.getTeamName(), yellowTeam);
-        teamManager.addTeam(redTeam.getTeamName(), limeTeam);
+        teamManager.addTeam(orangeTeam.getTeamName(), orangeTeam);
+        teamManager.addTeam(yellowTeam.getTeamName(), yellowTeam);
+        teamManager.addTeam(limeTeam.getTeamName(), limeTeam);
+
+        //Create player manager
+        playerManager = new PlayerManager();
 
         //Event Listeners
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
@@ -75,5 +80,9 @@ public final class MadnessCup extends JavaPlugin {
 
     public TeamManager getTeamManager() {
         return teamManager;
+    }
+
+    public PlayerManager getPlayerManager() {
+        return playerManager;
     }
 }

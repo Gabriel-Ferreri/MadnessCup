@@ -1,9 +1,7 @@
 package Coocos.madnessCup.listeners;
 
 import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.game.Game;
-import Coocos.madnessCup.game.Queue;
-import Coocos.madnessCup.game.games.ReincarnationBattle;
+import Coocos.madnessCup.game.other.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -15,7 +13,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.Inventory;
 
 import java.util.Random;
 
@@ -32,8 +29,10 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        event.setJoinMessage(null);
         Player player = event.getPlayer();
+        PlayerManager playerManager = plugin.getPlayerManager();
+        playerManager.registerPlayer(player.getUniqueId());
+        event.setJoinMessage(null);
         player.setGameMode(GameMode.ADVENTURE);
         Random random = new Random();
         String playerName = player.getName();

@@ -1,13 +1,13 @@
 package Coocos.madnessCup.game;
 
 import Coocos.madnessCup.MadnessCup;
+import Coocos.madnessCup.game.other.TeamManager;
 import Coocos.madnessCup.utils.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Queue class to organize queues before starting a game
@@ -72,15 +72,27 @@ public class Queue {
                     Player p = Bukkit.getPlayer(uuid);
                     if (p != null) p.teleport(gameLocation);
                 }
+                ArrayList<Team> teams = new ArrayList<>(plugin.getTeamManager().getAllTeams());
+                teamSort(players, teams);
                 players.clear();
                 currentCapacity = 0;
+                for (Team team : teams) game.addTeam(team);
                 game.startGame();
             }
         };
         countdown.start();
     }
+
     public void queueCancel() {
         countdown.cancel();
     }
 
+    public void teamSort(List<UUID> players, List<Team> teams) {
+        for (UUID uuid : players) {
+            teams.sort(Comparator.comparingInt(team -> team.getPlayers().size()));
+            Team team = teams.getFirst();
+            TeamManager teamManager = plugin.getTeamManager();
+            teamManager.addPlayerToTeam(uuid, team.getTeamName());
+        }
+    }
 }
