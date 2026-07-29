@@ -37,11 +37,8 @@ public class ReincarnationBattle extends Game {
             public void onFinish() {
                 for (UUID uuid : players) {
                     Player p = Bukkit.getPlayer(uuid);
-                    if (p != null) {
-                        p.sendMessage(ChatColor.GOLD + "Start fighting");
-                    }
+                    if (p != null) p.sendMessage(ChatColor.GOLD + "Start fighting");
                 }
-
             }
         };
         countdown.start();

@@ -48,10 +48,10 @@ public final class MadnessCup extends JavaPlugin {
         //Create team manager and add teams
         teamManager = new TeamManager();
 
-        Team redTeam = new Team(this, Collections.emptyList(), "Red Nerds", Color.RED, 0, 4);
-        Team orangeTeam = new Team(this, Collections.emptyList(), "Orange Nerds", Color.ORANGE, 0, 4);
-        Team yellowTeam = new Team(this, Collections.emptyList(), "Yellow Nerds", Color.YELLOW, 0, 4);
-        Team limeTeam = new Team(this, Collections.emptyList(), "Lime Nerds", Color.LIME, 0, 4);
+        Team redTeam = new Team(this, new ArrayList<>(), "Red Nerds", Color.RED, 0, 4);
+        Team orangeTeam = new Team(this, new ArrayList<>(), "Orange Nerds", Color.ORANGE, 0, 4);
+        Team yellowTeam = new Team(this, new ArrayList<>(), "Yellow Nerds", Color.YELLOW, 0, 4);
+        Team limeTeam = new Team(this, new ArrayList<>(), "Lime Nerds", Color.LIME, 0, 4);
 
         teamManager.addTeam(redTeam.getTeamName(), redTeam);
         teamManager.addTeam(orangeTeam.getTeamName(), orangeTeam);
