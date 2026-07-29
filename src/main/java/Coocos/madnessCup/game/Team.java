@@ -1,7 +1,7 @@
     package Coocos.madnessCup.game;
 
     import Coocos.madnessCup.MadnessCup;
-    import org.bukkit.Color;
+    import org.bukkit.ChatColor;
 
     import java.util.List;
     import java.util.UUID;
@@ -10,11 +10,11 @@
         private List<UUID> players;
         private String teamName;
         private final MadnessCup plugin;
-        private Color teamColor;
+        private ChatColor teamColor;
         private Integer teamCoins;
         private Integer teamLimit;
 
-        public Team(MadnessCup plugin, List<UUID> players, String teamName, Color teamColor, Integer teamCoins, Integer teamLimit) {
+        public Team(MadnessCup plugin, List<UUID> players, String teamName, ChatColor teamColor, Integer teamCoins, Integer teamLimit) {
             this.plugin = plugin;
             this.players = players;
             this.teamName = teamName;
@@ -26,13 +26,13 @@
         public MadnessCup getPlugin() { return plugin; }
         public List<UUID> getPlayers() { return players; }
         public String getTeamName() { return teamName; }
-        public Color getTeamColor() { return teamColor; }
+        public ChatColor getTeamColor() { return teamColor; }
         public Integer getTeamCoins() { return teamCoins; }
         public Integer getTeamLimit() { return teamLimit; }
 
         public void setPlayers(List<UUID> players) { this.players = players; }
         public void setTeamName(String teamName) { this.teamName = teamName; }
-        public void setTeamColor(Color teamColor) { this.teamColor = teamColor; }
+        public void setTeamColor(ChatColor teamColor) { this.teamColor = teamColor; }
         public void setTeamCoins(Integer teamCoins) { this.teamCoins = teamCoins; }
         public void setTeamLimit(Integer teamLimit) { this.teamLimit = teamLimit; }
 

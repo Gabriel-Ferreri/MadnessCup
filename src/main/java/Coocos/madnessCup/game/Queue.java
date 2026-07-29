@@ -6,6 +6,7 @@ import Coocos.madnessCup.utils.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 
 import java.util.*;
 
@@ -70,7 +71,11 @@ public class Queue {
 
                 for (UUID uuid : players) {
                     Player p = Bukkit.getPlayer(uuid);
-                    if (p != null) p.teleport(gameLocation);
+                    if (p != null) {
+                        p.teleport(gameLocation);
+                        Inventory inv = p.getInventory();
+                        inv.clear();
+                    }
                 }
                 ArrayList<Team> teams = new ArrayList<>(plugin.getTeamManager().getAllTeams());
                 teamSort(players, teams);

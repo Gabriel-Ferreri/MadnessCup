@@ -48,5 +48,14 @@ public class ReincarnationBattle extends Game {
     @Override
     public void endGame() {
         this.isRunning = false;
+        Location gameLocation = new Location(
+                Bukkit.getWorld("World"), 8.5, -56, 8.5, 0, 0);
+        for (Team team : this.teams) {
+            team.getPlayers().forEach(player -> {
+                players.add(player);
+                Player p = Bukkit.getPlayer(player);
+                if (p != null) p.teleport(gameLocation);
+            });
+        }
     }
 }
