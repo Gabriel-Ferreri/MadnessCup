@@ -13,6 +13,7 @@ import Coocos.madnessCup.utils.MenuHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.ChatColor;
 import java.util.ArrayList;
@@ -86,5 +87,9 @@ public final class MadnessCup extends JavaPlugin {
 
     public PlayerManager getPlayerManager() {
         return playerManager;
+    }
+
+    public boolean isAdmin(Player player) {
+        return player.getScoreboardTags().contains("admin");
     }
 }

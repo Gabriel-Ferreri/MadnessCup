@@ -2,6 +2,7 @@ package Coocos.madnessCup.utils;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -39,15 +40,19 @@ public class Countdown {
                 if (seconds > 0) {
                     for (UUID uuid : players) {
                         Player p = Bukkit.getPlayer(uuid);
-                        if (p != null)
+                        if (p != null) {
                             p.sendMessage(ChatColor.GOLD + "Starting in " + seconds + "...");
+                            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 1.0f, 1.0f);
+                        }
                     }
                     seconds--;
                 } else {
                     for (UUID uuid : players) {
                         Player p = Bukkit.getPlayer(uuid);
-                        if (p != null)
+                        if (p != null) {
                             p.sendMessage(ChatColor.GOLD + "Game started!");
+                            p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                        }
                     }
                     onFinish();
                     cancel();

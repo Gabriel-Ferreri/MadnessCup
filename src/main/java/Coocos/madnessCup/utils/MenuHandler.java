@@ -4,6 +4,7 @@ import Coocos.madnessCup.MadnessCup;
 import Coocos.madnessCup.game.Queue;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,10 +28,14 @@ public class MenuHandler implements Listener {
     }
 
     @EventHandler
-    public void onInventoryDrag(InventoryDragEvent event) { event.setCancelled(true); }
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getWhoClicked() instanceof Player player && plugin.isAdmin(player)) return;
+        event.setCancelled(true);
+    }
 
     @EventHandler
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
+        if (plugin.isAdmin(event.getPlayer())) return;
         event.setCancelled(true);
     }
 
@@ -41,11 +46,15 @@ public class MenuHandler implements Listener {
     }
 
     @EventHandler
-    public void onPlayerDrop(PlayerDropItemEvent event) { event.setCancelled(true); }
+    public void onPlayerDrop(PlayerDropItemEvent event) {
+        if (plugin.isAdmin(event.getPlayer())) return;
+        event.setCancelled(true);
+    }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         handleMenuItem(event.getPlayer(), event.getItem());
+        if (plugin.isAdmin(event.getPlayer())) return;
         event.setCancelled(true);
     }
 
@@ -53,6 +62,7 @@ public class MenuHandler implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         ItemStack clicked = event.getCurrentItem();
         handleMenuItem((Player) event.getWhoClicked(), clicked);
+        if (event.getWhoClicked() instanceof Player player && plugin.isAdmin(player)) return;
         event.setCancelled(true);
     }
 
@@ -69,6 +79,7 @@ public class MenuHandler implements Listener {
         if (key == null) return;
 
         Queue queue = plugin.getQueueManager().getQueue("reincarnation1");
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
 
         switch (key) {
             case "play":

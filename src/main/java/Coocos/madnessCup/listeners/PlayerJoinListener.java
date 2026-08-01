@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.util.Random;
@@ -66,6 +67,5 @@ public class PlayerJoinListener implements Listener {
     public void onItemSpawn(ItemSpawnEvent event) {
         event.getEntity().remove();
     }
-
 
 }
