@@ -96,7 +96,10 @@ public class Queue {
     }
 
     public void queueCancel() {
-        countdown.cancel();
+        if (countdown != null) {
+            countdown.cancel();
+            countdown = null;
+        }
     }
 
     public void teamSort(List<UUID> players, List<Team> teams) {
