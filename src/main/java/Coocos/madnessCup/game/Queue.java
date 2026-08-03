@@ -1,6 +1,7 @@
 package Coocos.madnessCup.game;
 
 import Coocos.madnessCup.MadnessCup;
+import Coocos.madnessCup.game.other.QueueManager;
 import Coocos.madnessCup.game.other.TeamManager;
 import Coocos.madnessCup.utils.Countdown;
 import org.bukkit.Bukkit;
@@ -18,10 +19,12 @@ public class Queue {
     private List<UUID> players;
     private int minCapacity, maxCapacity, currentCapacity;
     private final MadnessCup plugin;
+    private String queueName;
     private Countdown countdown;
 
-    public Queue(MadnessCup plugin, Game game, List<UUID> players, int minCapacity, int maxCapacity, int currentCapacity) {
+    public Queue(MadnessCup plugin, String queueName, Game game, List<UUID> players, int minCapacity, int maxCapacity, int currentCapacity) {
         this.plugin = plugin;
+        this.queueName = queueName;
         this.game = game;
         this.players = players;
         this.minCapacity = minCapacity;
@@ -29,7 +32,8 @@ public class Queue {
         this.currentCapacity = currentCapacity;
     }
 
-    public MadnessCup getPlugin() { return plugin; }
+    public MadnessCup getPlugin() { return this.plugin; }
+    public String getQueueName() { return this.queueName; }
     public Game getGame() { return this.game; }
     public List<UUID> getPlayers() { return this.players; }
     public int getMinCapacity() { return this.minCapacity; }
@@ -37,6 +41,7 @@ public class Queue {
     public int getCurrentCapacity() { return this.currentCapacity; }
 
     public void setGame(Game game) { this.game = game; }
+    public void setQueueName(String queueName) { this.queueName = queueName; }
     public void setPlayers(List<UUID> players) { this.players = players; }
     public void setMinCapacity(int minCapacity) {
         if (minCapacity > 1 && minCapacity <= maxCapacity)
@@ -83,6 +88,8 @@ public class Queue {
                 currentCapacity = 0;
                 for (Team team : teams) game.addTeam(team);
                 game.startGame();
+                QueueManager queueManager = plugin.getQueueManager();
+                queueManager.removeQueue(getQueueName());
             }
         };
         countdown.start();

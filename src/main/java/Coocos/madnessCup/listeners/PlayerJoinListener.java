@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.world.WorldLoadEvent;
 
 import java.util.Random;
 
@@ -42,9 +44,9 @@ public class PlayerJoinListener implements Listener {
                 Bukkit.getWorld("World"), 8.5, -56, 8.5, 0, 0);
         player.teleport(gameLocation);
         String[] MESSAGES = {
-                playerName + " is ready for trouble!",
+                playerName + " has joined! The nerds are taking over!",
                 "Have no fear " + playerName + " is here!",
-                "How much wood would " + playerName + " chuck if " + playerName + " could chuck wood?",
+                "How much wood could a " + playerName + " chuck if a " + playerName + " could chuck wood?",
                 playerName + " is here! With good intentions hopefully.",
         };
 
@@ -68,4 +70,9 @@ public class PlayerJoinListener implements Listener {
         event.getEntity().remove();
     }
 
+
+    @EventHandler
+    public void onWorldLoad(WorldLoadEvent event) {
+        plugin.disableVanillaFeatures(event.getWorld());
+    }
 }

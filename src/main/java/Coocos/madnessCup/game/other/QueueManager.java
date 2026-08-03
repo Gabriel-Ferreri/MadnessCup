@@ -20,6 +20,10 @@ public class QueueManager {
         return queues.get(name.toLowerCase());
     }
 
+    public void removeQueue(String name) {
+        queues.remove(name.toLowerCase());
+    }
+
     public Collection<Queue> getAllQueues() {
         // Maps return Collections
         return queues.values();

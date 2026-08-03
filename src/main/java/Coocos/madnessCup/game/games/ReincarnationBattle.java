@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class ReincarnationBattle extends Game {
@@ -22,13 +23,19 @@ public class ReincarnationBattle extends Game {
     @Override
     public void startGame() {
         this.isRunning = true;
-        Location gameLocation = new Location(
-                Bukkit.getWorld("game"), 9.5, -54, -10.5, 0, 0);
+        Location redLocation = new Location(Bukkit.getWorld("game"), -18.5, -54, 22.5, 0, 0);
+        Location orangeLocation = new Location(Bukkit.getWorld("game"), -15.5, -54, -17.5, 0, 0);
+        Location yellowLocation = new Location(Bukkit.getWorld("game"), 24.5, -54, -15.5, 0, 0);
+        Location limeLocation = new Location(Bukkit.getWorld("game"), 22.5, -54, 24.5, 0, 0);
+
         for (Team team : this.teams) {
             team.getPlayers().forEach(player -> {
                 players.add(player);
                 Player p = Bukkit.getPlayer(player);
-                if (p != null) p.teleport(gameLocation);
+                if (Objects.equals(team.getTeamName(), "Red Nerds")) p.teleport(redLocation);
+                if (Objects.equals(team.getTeamName(), "Orange Nerds")) p.teleport(orangeLocation);
+                if (Objects.equals(team.getTeamName(), "Yellow Nerds")) p.teleport(yellowLocation);
+                if (Objects.equals(team.getTeamName(), "Lime Nerds")) p.teleport(limeLocation);
             });
         }
         Countdown countdown = new Countdown(plugin, players, 5) {
@@ -47,14 +54,5 @@ public class ReincarnationBattle extends Game {
     @Override
     public void endGame() {
         this.isRunning = false;
-        Location gameLocation = new Location(
-                Bukkit.getWorld("World"), 8.5, -56, 8.5, 0, 0);
-        for (Team team : this.teams) {
-            team.getPlayers().forEach(player -> {
-                players.add(player);
-                Player p = Bukkit.getPlayer(player);
-                if (p != null) p.teleport(gameLocation);
-            });
-        }
     }
 }

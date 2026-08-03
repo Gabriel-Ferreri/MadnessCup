@@ -10,12 +10,13 @@ import Coocos.madnessCup.game.other.TeamManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
 import Coocos.madnessCup.utils.ItemFactory;
 import Coocos.madnessCup.utils.MenuHandler;
-import org.bukkit.Bukkit;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.ChatColor;
+
 import java.util.ArrayList;
 
 /**
@@ -29,19 +30,19 @@ public final class MadnessCup extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
-
         ConsoleCommandSender console = getServer().getConsoleSender();
         console.sendMessage(ChatColor.GREEN + "MadnessCup Plugin Enabled");
         // Delay world loading until server is ready
         Bukkit.getScheduler().runTask(this, () -> {
             new WorldCreator("game").createWorld();
         });
+
         ItemFactory.init(this);
         queueManager = new QueueManager();
 
         Game reincarnation = new ReincarnationBattle(this, new ArrayList<>(), false);
-        Queue reincarnationQueue = new Queue(this, reincarnation, new ArrayList<>(), 1, 3, 0);
-        queueManager.registerQueue("reincarnation1", reincarnationQueue);
+        Queue reincarnationQueue = new Queue(this, "reincarnation1", reincarnation, new ArrayList<>(), 2, 3, 0);
+        queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
 
         // Delay team setup until the server is fully ready
         Bukkit.getScheduler().runTask(this, () -> {
@@ -60,6 +61,8 @@ public final class MadnessCup extends JavaPlugin {
             teamManager.addTeam(limeTeam.getTeamName(), limeTeam);
 
         });
+
+        for (World world : Bukkit.getWorlds()) console.sendMessage(("Loaded world: " + world.getName()));
 
         //Create player manager
         playerManager = new PlayerManager();
@@ -92,4 +95,15 @@ public final class MadnessCup extends JavaPlugin {
     public boolean isAdmin(Player player) {
         return player.getScoreboardTags().contains("admin");
     }
+
+    public void disableVanillaFeatures(World world) {
+        world.setGameRule(GameRules.ADVANCE_TIME, false);
+        world.setGameRule(GameRules.SPAWN_MOBS, false);
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+        world.setGameRule(GameRules.ADVANCE_WEATHER, false);
+        world.setGameRule(GameRules.BLOCK_DROPS, false);
+        world.setGameRule(GameRules.ENTITY_DROPS, false);
+
+    }
+
 }
