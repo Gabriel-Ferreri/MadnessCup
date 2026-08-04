@@ -1,4 +1,4 @@
-package Coocos.madnessCup.queue;
+package Coocos.madnessCup.systems;
 
 import java.util.UUID;
 
@@ -11,6 +11,7 @@ public class PlayerInfo {
 
     public PlayerInfo(UUID uuid) {
         this.uuid = uuid;
+        this.team = null;
         this.coins = 0;
         this.kills = 0;
         this.deaths = 0;

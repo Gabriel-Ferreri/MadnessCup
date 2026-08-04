@@ -1,10 +1,8 @@
 package Coocos.madnessCup.queue;
 
-import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.queue.other.QueueManager;
+import Coocos.madnessCup.systems.Queue;
+import Coocos.madnessCup.systems.managers.QueueManager;
 import org.junit.jupiter.api.Test;
-
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 

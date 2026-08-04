@@ -1,7 +1,7 @@
 package Coocos.madnessCup.listeners;
 
 import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.queue.other.PlayerManager;
+import Coocos.madnessCup.systems.managers.PlayerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;

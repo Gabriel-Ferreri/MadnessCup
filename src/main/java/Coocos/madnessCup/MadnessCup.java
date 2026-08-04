@@ -1,12 +1,13 @@
 package Coocos.madnessCup;
 
-import Coocos.madnessCup.queue.Game;
-import Coocos.madnessCup.queue.Queue;
-import Coocos.madnessCup.queue.Team;
-import Coocos.madnessCup.queue.games.ReincarnationBattle;
-import Coocos.madnessCup.queue.other.PlayerManager;
-import Coocos.madnessCup.queue.other.QueueManager;
-import Coocos.madnessCup.queue.other.TeamManager;
+import Coocos.madnessCup.systems.Game;
+import Coocos.madnessCup.systems.PlayerInfo;
+import Coocos.madnessCup.systems.Queue;
+import Coocos.madnessCup.systems.Team;
+import Coocos.madnessCup.games.ReincarnationBattle;
+import Coocos.madnessCup.systems.managers.PlayerManager;
+import Coocos.madnessCup.systems.managers.QueueManager;
+import Coocos.madnessCup.systems.managers.TeamManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
 import Coocos.madnessCup.utils.ItemFactory;
 import Coocos.madnessCup.utils.MenuHandler;
@@ -76,6 +77,10 @@ public final class MadnessCup extends JavaPlugin {
 
         ConsoleCommandSender console = getServer().getConsoleSender();
         console.sendMessage(ChatColor.RED + "MadnessCup Plugin Disabled");
+
+        for (PlayerInfo info : playerManager.getAllPlayers()) {
+            if (info.getTeam() != null) teamManager.removePlayerFromTeam(info.getUuid(), info.getTeam().getTeamName());
+        }
     }
 
     public QueueManager getQueueManager() {

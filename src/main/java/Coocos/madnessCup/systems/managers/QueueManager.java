@@ -1,6 +1,6 @@
-package Coocos.madnessCup.queue.other;
+package Coocos.madnessCup.systems.managers;
 
-import Coocos.madnessCup.queue.Queue;
+import Coocos.madnessCup.systems.Queue;
 
 import java.util.Collection;
 import java.util.HashMap;

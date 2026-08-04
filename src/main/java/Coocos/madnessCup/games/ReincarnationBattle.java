@@ -1,8 +1,8 @@
-package Coocos.madnessCup.queue.games;
+package Coocos.madnessCup.games;
 
 import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.queue.Game;
-import Coocos.madnessCup.queue.Team;
+import Coocos.madnessCup.systems.Game;
+import Coocos.madnessCup.systems.Team;
 import Coocos.madnessCup.utils.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

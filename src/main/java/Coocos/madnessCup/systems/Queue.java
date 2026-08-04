@@ -1,9 +1,9 @@
-package Coocos.madnessCup.queue;
+package Coocos.madnessCup.systems;
 
 import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.queue.games.ReincarnationBattle;
-import Coocos.madnessCup.queue.other.QueueManager;
-import Coocos.madnessCup.queue.other.TeamManager;
+import Coocos.madnessCup.games.ReincarnationBattle;
+import Coocos.madnessCup.systems.managers.QueueManager;
+import Coocos.madnessCup.systems.managers.TeamManager;
 import Coocos.madnessCup.utils.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;

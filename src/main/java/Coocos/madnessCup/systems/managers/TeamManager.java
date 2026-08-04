@@ -1,6 +1,6 @@
-package Coocos.madnessCup.queue.other;
+package Coocos.madnessCup.systems.managers;
 
-import Coocos.madnessCup.queue.Team;
+import Coocos.madnessCup.systems.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

@@ -1,7 +1,7 @@
 package Coocos.madnessCup.utils;
 
 import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.queue.Queue;
+import Coocos.madnessCup.systems.Queue;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
