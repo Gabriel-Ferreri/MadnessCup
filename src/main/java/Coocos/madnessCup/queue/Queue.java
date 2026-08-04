@@ -1,8 +1,9 @@
-package Coocos.madnessCup.game;
+package Coocos.madnessCup.queue;
 
 import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.game.other.QueueManager;
-import Coocos.madnessCup.game.other.TeamManager;
+import Coocos.madnessCup.queue.games.ReincarnationBattle;
+import Coocos.madnessCup.queue.other.QueueManager;
+import Coocos.madnessCup.queue.other.TeamManager;
 import Coocos.madnessCup.utils.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -90,6 +91,9 @@ public class Queue {
                 game.startGame();
                 QueueManager queueManager = plugin.getQueueManager();
                 queueManager.removeQueue(getQueueName());
+                Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
+                Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 3, 0);
+                queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
             }
         };
         countdown.start();

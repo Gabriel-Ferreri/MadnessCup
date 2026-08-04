@@ -1,21 +1,17 @@
 package Coocos.madnessCup.utils;
 
 import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.game.Queue;
-import Coocos.madnessCup.game.Team;
-import Coocos.madnessCup.game.other.QueueManager;
+import Coocos.madnessCup.queue.Queue;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.event.server.BroadcastMessageEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;

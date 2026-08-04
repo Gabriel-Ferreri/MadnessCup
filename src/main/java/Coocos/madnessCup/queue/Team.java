@@ -1,4 +1,4 @@
-    package Coocos.madnessCup.game;
+    package Coocos.madnessCup.queue;
 
     import Coocos.madnessCup.MadnessCup;
     import org.bukkit.ChatColor;

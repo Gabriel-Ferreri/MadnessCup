@@ -1,6 +1,6 @@
-package Coocos.madnessCup.game.other;
+package Coocos.madnessCup.queue.other;
 
-import Coocos.madnessCup.game.PlayerInfo;
+import Coocos.madnessCup.queue.PlayerInfo;
 
 import java.util.Collection;
 import java.util.HashMap;

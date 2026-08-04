@@ -1,20 +1,18 @@
 package Coocos.madnessCup;
 
-import Coocos.madnessCup.game.Game;
-import Coocos.madnessCup.game.Queue;
-import Coocos.madnessCup.game.Team;
-import Coocos.madnessCup.game.games.ReincarnationBattle;
-import Coocos.madnessCup.game.other.PlayerManager;
-import Coocos.madnessCup.game.other.QueueManager;
-import Coocos.madnessCup.game.other.TeamManager;
+import Coocos.madnessCup.queue.Game;
+import Coocos.madnessCup.queue.Queue;
+import Coocos.madnessCup.queue.Team;
+import Coocos.madnessCup.queue.games.ReincarnationBattle;
+import Coocos.madnessCup.queue.other.PlayerManager;
+import Coocos.madnessCup.queue.other.QueueManager;
+import Coocos.madnessCup.queue.other.TeamManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
 import Coocos.madnessCup.utils.ItemFactory;
 import Coocos.madnessCup.utils.MenuHandler;
 import org.bukkit.*;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;

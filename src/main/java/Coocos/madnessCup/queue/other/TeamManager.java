@@ -1,7 +1,6 @@
-package Coocos.madnessCup.game.other;
+package Coocos.madnessCup.queue.other;
 
-import Coocos.madnessCup.MadnessCup;
-import Coocos.madnessCup.game.Team;
+import Coocos.madnessCup.queue.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;

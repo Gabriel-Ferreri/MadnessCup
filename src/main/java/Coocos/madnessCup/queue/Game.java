@@ -1,9 +1,8 @@
-package Coocos.madnessCup.game;
+package Coocos.madnessCup.queue;
 
 import Coocos.madnessCup.MadnessCup;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  *  Game abstract class from which all the games will inherit some fundamental

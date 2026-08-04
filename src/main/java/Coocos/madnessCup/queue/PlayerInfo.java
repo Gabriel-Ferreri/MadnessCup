@@ -1,4 +1,4 @@
-package Coocos.madnessCup.game;
+package Coocos.madnessCup.queue;
 
 import java.util.UUID;
 
