@@ -95,9 +95,10 @@ public final class MadnessCup extends JavaPlugin {
         return playerManager;
     }
 
-    public boolean isAdmin(Player player) {
-        return player.getScoreboardTags().contains("admin");
-    }
+    public boolean isAdmin(Player player) {return player.getScoreboardTags().contains("admin");}
+    public boolean isInGame(Player player) {return player.getScoreboardTags().contains("ingame");}
+
+    public boolean bypassLobbyRestrictions(Player player) {return isAdmin(player) || isInGame(player);}
 
     public void disableVanillaFeatures(World world) {
         world.setGameRule(GameRules.ADVANCE_TIME, false);

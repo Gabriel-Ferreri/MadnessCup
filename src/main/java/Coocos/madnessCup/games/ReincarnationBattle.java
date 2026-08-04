@@ -2,12 +2,15 @@ package Coocos.madnessCup.games;
 
 import Coocos.madnessCup.MadnessCup;
 import Coocos.madnessCup.systems.Game;
+import Coocos.madnessCup.systems.PlayerInfo;
 import Coocos.madnessCup.systems.Team;
 import Coocos.madnessCup.utils.Countdown;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +19,7 @@ import java.util.UUID;
 
 public class ReincarnationBattle extends Game {
     List<UUID> players = new ArrayList<>();
+    List<UUID> alivePlayers = new ArrayList<>();
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
         super(plugin, teams, isRunning);
     }
@@ -38,6 +42,7 @@ public class ReincarnationBattle extends Game {
                 if (Objects.equals(team.getTeamName(), "Lime Nerds")) p.teleport(limeLocation);
             });
         }
+        alivePlayers.addAll(players);
         Countdown countdown = new Countdown(plugin, players, 5) {
             @Override
             public void onFinish() {
@@ -54,5 +59,25 @@ public class ReincarnationBattle extends Game {
     @Override
     public void endGame() {
         this.isRunning = false;
+    }
+
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        alivePlayers.remove(event.getEntity().getUniqueId());
+        if (isOneTeamLeft()) endGame();
+    }
+
+    private boolean isOneTeamLeft() {
+        Team team = null;
+        for (UUID uuid : alivePlayers) {
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+
+            if (team == null) {
+                team = info.getTeam();
+            } else if (!team.equals(info.getTeam())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

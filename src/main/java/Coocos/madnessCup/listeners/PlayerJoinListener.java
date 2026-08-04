@@ -54,19 +54,18 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onDamage(EntityDamageEvent event) {
-        if (event.getEntity() instanceof Player)
-            event.setCancelled(true);
+        if (event.getEntity().getScoreboardTags().contains("ingame")) return;
+        if (event.getEntity() instanceof Player) event.setCancelled(true);
     }
 
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        if (event.getEntity().getScoreboardTags().contains("ingame")) return;
         event.setCancelled(true);
     }
 
     @EventHandler
-    public void onItemSpawn(ItemSpawnEvent event) {
-        event.getEntity().remove();
-    }
+    public void onItemSpawn(ItemSpawnEvent event) {event.getEntity().remove();}
 
 
     @EventHandler

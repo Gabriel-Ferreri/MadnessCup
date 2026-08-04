@@ -24,10 +24,11 @@ public class ItemFactory {
         ItemStack paper = new ItemStack(Material.PAPER);
         ItemMeta meta = paper.getItemMeta();
         meta.setDisplayName(ChatColor.GREEN + displayName);
-        meta.setLore(Arrays.asList(ChatColor.GRAY + lore));
+        meta.setLore(Arrays.stream(lore.split("\n")).map(line -> ChatColor.GRAY + line).toList());
         meta.getPersistentDataContainer().set(KEY_MENU, PersistentDataType.STRING, key);
         paper.setItemMeta(meta);
         return paper;
+
     }
 
 }

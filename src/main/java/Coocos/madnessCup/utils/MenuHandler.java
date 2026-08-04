@@ -34,13 +34,13 @@ public class MenuHandler implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getWhoClicked() instanceof Player player && plugin.isAdmin(player)) return;
+        if (event.getWhoClicked() instanceof Player player && plugin.bypassLobbyRestrictions(player)) return;
         event.setCancelled(true);
     }
 
     @EventHandler
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
-        if (plugin.isAdmin(event.getPlayer())) return;
+        if (plugin.bypassLobbyRestrictions(event.getPlayer())) return;
         event.setCancelled(true);
     }
 
@@ -52,14 +52,14 @@ public class MenuHandler implements Listener {
 
     @EventHandler
     public void onPlayerDrop(PlayerDropItemEvent event) {
-        if (plugin.isAdmin(event.getPlayer())) return;
+        if (plugin.bypassLobbyRestrictions(event.getPlayer())) return;
         event.setCancelled(true);
     }
 
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent event) {
         handleMenuItem(event.getPlayer(), event.getItem());
-        if (plugin.isAdmin(event.getPlayer())) return;
+        if (plugin.bypassLobbyRestrictions(event.getPlayer())) return;
         event.setCancelled(true);
     }
 
@@ -67,7 +67,8 @@ public class MenuHandler implements Listener {
     public void onInventoryClick(InventoryClickEvent event) {
         ItemStack clicked = event.getCurrentItem();
         handleMenuItem((Player) event.getWhoClicked(), clicked);
-        if (event.getWhoClicked() instanceof Player player && plugin.isAdmin(player)) return;
+        if (event.getWhoClicked() instanceof Player player && plugin.bypassLobbyRestrictions(player)) return;
+
         event.setCancelled(true);
     }
 
@@ -127,7 +128,10 @@ public class MenuHandler implements Listener {
         Inventory inv = Bukkit.createInventory(null, 27,"Reincarnation Battle Queues");
         int i = 0;
         for (Queue queue : queues) {
-            inv.setItem(i, ItemFactory.createPaper("Join Queue",queue.getQueueName(), "join"));
+            inv.setItem(i, ItemFactory.createPaper("Join Queue",
+                    queue.getQueueName() + "\n" + queue.getCurrentCapacity()
+                            + "\\" + queue.getMaxCapacity() +  " Player in the queue \n" + queue.getMinCapacity()
+                            + " Minimum players required to start", "join"));
             i+=1;
         }
         player.openInventory(inv);
