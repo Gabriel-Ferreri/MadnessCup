@@ -10,6 +10,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ReincarnationBattle extends Game {
+public class ReincarnationBattle extends Game implements Listener{
     List<UUID> players = new ArrayList<>();
     List<UUID> alivePlayers = new ArrayList<>();
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
@@ -27,6 +29,7 @@ public class ReincarnationBattle extends Game {
     @Override
     public void startGame() {
         this.isRunning = true;
+        Bukkit.getPluginManager().registerEvents(this, plugin);
         Location redLocation = new Location(Bukkit.getWorld("game"), -18.5, -54, 22.5, 0, 0);
         Location orangeLocation = new Location(Bukkit.getWorld("game"), -15.5, -54, -17.5, 0, 0);
         Location yellowLocation = new Location(Bukkit.getWorld("game"), 24.5, -54, -15.5, 0, 0);
@@ -58,6 +61,7 @@ public class ReincarnationBattle extends Game {
 
     @Override
     public void endGame() {
+        HandlerList.unregisterAll(this);
         this.isRunning = false;
     }
 
