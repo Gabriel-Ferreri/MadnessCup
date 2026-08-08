@@ -11,12 +11,20 @@ import Coocos.madnessCup.systems.managers.TeamManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
 import Coocos.madnessCup.utils.ItemFactory;
 import Coocos.madnessCup.utils.MenuHandler;
+import com.google.gson.Gson;
 import org.bukkit.*;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Main class for plugin starting logic implementation
@@ -59,6 +67,9 @@ public final class MadnessCup extends JavaPlugin {
             teamManager.addTeam(yellowTeam.getTeamName(), yellowTeam);
             teamManager.addTeam(limeTeam.getTeamName(), limeTeam);
 
+
+            testBackend();
+            testTeamBackend();
         });
 
         for (World world : Bukkit.getWorlds()) console.sendMessage(("Loaded world: " + world.getName()));
@@ -107,6 +118,58 @@ public final class MadnessCup extends JavaPlugin {
         world.setGameRule(GameRules.ADVANCE_WEATHER, false);
         world.setGameRule(GameRules.BLOCK_DROPS, false);
         world.setGameRule(GameRules.ENTITY_DROPS, false);
+
+    }
+
+    public void testBackend() {
+
+        try {
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/hello")).GET().build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println(response.body());
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void testTeamBackend() {
+
+        try {
+
+            List<String> teamNames = this.getTeamManager()
+                    .getAllTeams()
+                    .stream()
+                    .map(Team::getTeamName)
+                    .collect(Collectors.toList());
+
+            Gson gson = new Gson();
+            String json = gson.toJson(teamNames);
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/teams"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Status: " + response.statusCode());
+            System.out.println("Response: " + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 

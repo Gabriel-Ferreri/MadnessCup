@@ -23,6 +23,8 @@ public class TeamManager {
         return teams.values();
     }
 
+    public Team getTeam(String name) {return teams.get(name);}
+
     public void addTeam(String name, Team team) {
         teams.put(name, team);
 
