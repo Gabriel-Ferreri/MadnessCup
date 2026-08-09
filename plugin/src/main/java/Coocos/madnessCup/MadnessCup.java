@@ -48,7 +48,7 @@ public final class MadnessCup extends JavaPlugin {
         queueManager = new QueueManager();
 
         Game reincarnation = new ReincarnationBattle(this, new ArrayList<>(), false);
-        Queue reincarnationQueue = new Queue(this, "reincarnation1", reincarnation, new ArrayList<>(), 2, 3, 0);
+        Queue reincarnationQueue = new Queue(this, "reincarnation1", reincarnation, new ArrayList<>(), 1, 3, 0);
         queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
 
         // Delay team setup until the server is fully ready
@@ -57,10 +57,10 @@ public final class MadnessCup extends JavaPlugin {
             //Create team manager and add teams
             teamManager = new TeamManager();
 
-            Team redTeam = new Team(this, new ArrayList<>(), "Red Nerds", ChatColor.RED, 0, 4);
-            Team orangeTeam = new Team(this, new ArrayList<>(), "Orange Nerds", ChatColor.GOLD, 0, 4);
-            Team yellowTeam = new Team(this, new ArrayList<>(), "Yellow Nerds", ChatColor.YELLOW, 0, 4);
-            Team limeTeam = new Team(this, new ArrayList<>(), "Lime Nerds", ChatColor.GREEN, 0, 4);
+            Team redTeam = new Team(this, new ArrayList<>(), "Red Nerds", ChatColor.RED, Color.RED, 0, 4);
+            Team orangeTeam = new Team(this, new ArrayList<>(), "Orange Nerds", ChatColor.GOLD, Color.ORANGE, 0, 4);
+            Team yellowTeam = new Team(this, new ArrayList<>(), "Yellow Nerds", ChatColor.YELLOW, Color.YELLOW, 0, 4);
+            Team limeTeam = new Team(this, new ArrayList<>(), "Lime Nerds", ChatColor.GREEN, Color.LIME, 0, 4);
 
             teamManager.addTeam(redTeam.getTeamName(), redTeam);
             teamManager.addTeam(orangeTeam.getTeamName(), orangeTeam);

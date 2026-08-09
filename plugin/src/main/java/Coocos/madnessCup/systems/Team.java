@@ -2,6 +2,7 @@
 
     import Coocos.madnessCup.MadnessCup;
     import org.bukkit.ChatColor;
+    import org.bukkit.Color;
 
     import java.util.List;
     import java.util.UUID;
@@ -11,14 +12,16 @@
         private String teamName;
         private final MadnessCup plugin;
         private ChatColor teamColor;
+        private Color customizeColor;
         private Integer teamCoins;
         private Integer teamLimit;
 
-        public Team(MadnessCup plugin, List<UUID> players, String teamName, ChatColor teamColor, Integer teamCoins, Integer teamLimit) {
+        public Team(MadnessCup plugin, List<UUID> players, String teamName, ChatColor teamColor, Color customizeColor, Integer teamCoins, Integer teamLimit) {
             this.plugin = plugin;
             this.players = players;
             this.teamName = teamName;
             this.teamColor = teamColor;
+            this.customizeColor = customizeColor;
             this.teamCoins = teamCoins;
             this.teamLimit = teamLimit;
         }
@@ -27,12 +30,14 @@
         public List<UUID> getPlayers() { return players; }
         public String getTeamName() { return teamName; }
         public ChatColor getTeamColor() { return teamColor; }
+        public Color getCustomizeColor() { return customizeColor; }
         public Integer getTeamCoins() { return teamCoins; }
         public Integer getTeamLimit() { return teamLimit; }
 
         public void setPlayers(List<UUID> players) { this.players = players; }
         public void setTeamName(String teamName) { this.teamName = teamName; }
         public void setTeamColor(ChatColor teamColor) { this.teamColor = teamColor; }
+        public void setCustomizeColor(Color customizeColor) { this.customizeColor = customizeColor; }
         public void setTeamCoins(Integer teamCoins) { this.teamCoins = teamCoins; }
         public void setTeamLimit(Integer teamLimit) { this.teamLimit = teamLimit; }
 

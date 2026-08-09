@@ -112,6 +112,8 @@ public class Queue {
             Team team = teams.getFirst();
             TeamManager teamManager = plugin.getTeamManager();
             teamManager.addPlayerToTeam(uuid, team.getTeamName());
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            if (info != null) info.setTeam(team);
         }
     }
 }

@@ -1,6 +1,7 @@
 package Coocos.madnessCup.systems.managers;
 
 import Coocos.madnessCup.systems.PlayerInfo;
+import Coocos.madnessCup.systems.Team;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,5 +22,11 @@ public class PlayerManager {
 
     public Collection<PlayerInfo> getAllPlayers() {
         return players.values();
+    }
+
+    public Team getPlayerTeam(UUID uuid) {
+        PlayerInfo info = players.get(uuid);
+        if (info == null) return null;
+        return info.getTeam();
     }
 }
