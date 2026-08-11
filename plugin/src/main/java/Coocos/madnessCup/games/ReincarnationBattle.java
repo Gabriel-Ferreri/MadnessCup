@@ -3,7 +3,9 @@ package Coocos.madnessCup.games;
 import Coocos.madnessCup.MadnessCup;
 import Coocos.madnessCup.systems.Game;
 import Coocos.madnessCup.systems.PlayerInfo;
+import Coocos.madnessCup.systems.Queue;
 import Coocos.madnessCup.systems.Team;
+import Coocos.madnessCup.systems.managers.QueueManager;
 import Coocos.madnessCup.utils.Countdown;
 import Coocos.madnessCup.utils.ItemFactory;
 import io.papermc.paper.block.BlockPredicate;
@@ -44,10 +46,10 @@ public class ReincarnationBattle extends Game implements Listener{
     public void startGame() {
         this.isRunning = true;
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        Location redLocation = new Location(Bukkit.getWorld("game"), -18.5, -54, 22.5, 0, 0);
-        Location orangeLocation = new Location(Bukkit.getWorld("game"), -15.5, -54, -17.5, 0, 0);
-        Location yellowLocation = new Location(Bukkit.getWorld("game"), 24.5, -54, -15.5, 0, 0);
-        Location limeLocation = new Location(Bukkit.getWorld("game"), 22.5, -54, 24.5, 0, 0);
+        Location redLocation = new Location(Bukkit.getWorld("reincarnation1"), -18.5, -54, 22.5, 0, 0);
+        Location orangeLocation = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
+        Location yellowLocation = new Location(Bukkit.getWorld("reincarnation1"), 24.5, -54, -15.5, 0, 0);
+        Location limeLocation = new Location(Bukkit.getWorld("reincarnation1"), 22.5, -54, 24.5, 0, 0);
         for (Team team : this.teams) {
             for (UUID uuid : team.getPlayers()) {
                 Player player = Bukkit.getPlayer(uuid);
@@ -93,6 +95,12 @@ public class ReincarnationBattle extends Game implements Listener{
 
         players.clear();
         alivePlayers.clear();
+        QueueManager queueManager = plugin.getQueueManager();
+        queueManager.removeQueue("reincarnation1");
+        Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
+        Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 3, 0);
+        queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
+
     }
 
     @EventHandler

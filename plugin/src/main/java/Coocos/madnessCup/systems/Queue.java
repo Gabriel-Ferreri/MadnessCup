@@ -73,7 +73,7 @@ public class Queue {
             @Override
             public void onFinish() {
                 Location gameLocation = new Location(
-                        Bukkit.getWorld("game"), 9.5, -57, -10.5, 0, 0);
+                        Bukkit.getWorld("reincarnation1"), 9.5, -57, -10.5, 0, 0);
 
                 for (UUID uuid : players) {
                     Player p = Bukkit.getPlayer(uuid);
@@ -89,11 +89,6 @@ public class Queue {
                 currentCapacity = 0;
                 for (Team team : teams) game.addTeam(team);
                 game.startGame();
-                QueueManager queueManager = plugin.getQueueManager();
-                queueManager.removeQueue(getQueueName());
-                Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
-                Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 3, 0);
-                queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
             }
         };
         countdown.start();

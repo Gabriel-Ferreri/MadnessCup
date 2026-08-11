@@ -9,6 +9,7 @@ import Coocos.madnessCup.systems.managers.PlayerManager;
 import Coocos.madnessCup.systems.managers.QueueManager;
 import Coocos.madnessCup.systems.managers.TeamManager;
 import Coocos.madnessCup.listeners.PlayerJoinListener;
+import Coocos.madnessCup.utils.DirectoryManager;
 import Coocos.madnessCup.utils.ItemFactory;
 import Coocos.madnessCup.utils.MenuHandler;
 import com.google.gson.Gson;
@@ -39,11 +40,7 @@ public final class MadnessCup extends JavaPlugin {
         // Plugin startup logic
         ConsoleCommandSender console = getServer().getConsoleSender();
         console.sendMessage(ChatColor.GREEN + "MadnessCup Plugin Enabled");
-        // Delay world loading until server is ready
-        Bukkit.getScheduler().runTask(this, () -> {
-            new WorldCreator("game").createWorld();
-        });
-
+        DirectoryManager.deleteDimension("reincarnation1");
         ItemFactory.init(this);
         queueManager = new QueueManager();
 
@@ -88,8 +85,8 @@ public final class MadnessCup extends JavaPlugin {
 
         ConsoleCommandSender console = getServer().getConsoleSender();
         console.sendMessage(ChatColor.RED + "MadnessCup Plugin Disabled");
-
         for (PlayerInfo info : playerManager.getAllPlayers()) {
+            Bukkit.getPlayer(info.getUuid()).removeScoreboardTag("ingame");
             if (info.getTeam() != null) teamManager.removePlayerFromTeam(info.getUuid(), info.getTeam().getTeamName());
         }
     }
