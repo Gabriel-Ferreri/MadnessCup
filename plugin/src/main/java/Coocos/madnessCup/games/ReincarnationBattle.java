@@ -30,14 +30,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.jspecify.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class ReincarnationBattle extends Game implements Listener{
-    List<UUID> players = new ArrayList<>();
-    List<UUID> alivePlayers = new ArrayList<>();
+    Map<UUID, Integer> players = new HashMap<>();
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
         super(plugin, teams, isRunning);
     }
@@ -54,7 +50,7 @@ public class ReincarnationBattle extends Game implements Listener{
             for (UUID uuid : team.getPlayers()) {
                 Player player = Bukkit.getPlayer(uuid);
                 if (player == null) continue;
-                players.add(uuid);
+                players.put(uuid,2);
                 player.addScoreboardTag("ingame");
                 switch (team.getTeamName()) {
                     case "Red Nerds" -> player.teleport(redLocation);
@@ -65,14 +61,14 @@ public class ReincarnationBattle extends Game implements Listener{
                 givePlayersInventory(player);
             }
         }
-        alivePlayers.addAll(players);
-        Countdown countdown = new Countdown(plugin, players, 5) {
+        Countdown countdown = new Countdown(plugin, new ArrayList<>(players.keySet()), 5) {
             @Override
             public void onFinish() {
-                for (UUID uuid : players) {
+                for (UUID uuid : players.keySet()) {
                     Player p = Bukkit.getPlayer(uuid);
                     if (p != null) p.sendMessage(ChatColor.GOLD + "Start fighting");
                 }
+                glassRemoval();
             }
         };
         countdown.start();
@@ -84,7 +80,7 @@ public class ReincarnationBattle extends Game implements Listener{
         HandlerList.unregisterAll(this);
         this.isRunning = false;
 
-        for (UUID uuid : players) {
+        for (UUID uuid : players.keySet()) {
             PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
             Player player = Bukkit.getPlayer(uuid);
             player.removeScoreboardTag("ingame");
@@ -94,7 +90,6 @@ public class ReincarnationBattle extends Game implements Listener{
         }
 
         players.clear();
-        alivePlayers.clear();
         QueueManager queueManager = plugin.getQueueManager();
         queueManager.removeQueue("reincarnation1");
         Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
@@ -103,21 +98,32 @@ public class ReincarnationBattle extends Game implements Listener{
 
     }
 
+    public void glassRemoval() {
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback false");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill -16 -52 24 -21 -54 20 air replace red_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill -18 -52 -16 -14 -54 -21 air replace orange_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 22 -52 -14 27 -54 -18 air replace yellow_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 24 -52 22 20 -54 27 air replace lime_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback true");
+    }
+
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        alivePlayers.remove(event.getEntity().getUniqueId());
+        players.put(event.getPlayer().getUniqueId(), players.get(event.getPlayer().getUniqueId()) - 1);
         if (isOneTeamLeft()) endGame();
     }
 
     private boolean isOneTeamLeft() {
         Team team = null;
-        for (UUID uuid : alivePlayers) {
-            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+        for (UUID uuid : players.keySet()) {
+            if (players.get(uuid) >= 2) {
+                PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
 
-            if (team == null) {
-                team = info.getTeam();
-            } else if (!team.equals(info.getTeam())) {
-                return false;
+                if (team == null) {
+                    team = info.getTeam();
+                } else if (!team.equals(info.getTeam())) {
+                    return false;
+                }
             }
         }
         return true;
@@ -161,7 +167,7 @@ public class ReincarnationBattle extends Game implements Listener{
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         if (event.getBlock().getType() == Material.RAW_GOLD_BLOCK &&
-                players.contains(player.getUniqueId())) {
+                players.containsKey(player.getUniqueId())) {
             PlayerInfo info = plugin.getPlayerManager().getPlayer(player.getUniqueId());
             info.addCoins(10);
             Bukkit.getLogger().info("Player " + player.getName() + " has coins " + info.getCoins());
