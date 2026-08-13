@@ -115,6 +115,7 @@ public final class MadnessCup extends JavaPlugin {
         world.setGameRule(GameRules.ADVANCE_WEATHER, false);
         world.setGameRule(GameRules.BLOCK_DROPS, false);
         world.setGameRule(GameRules.ENTITY_DROPS, false);
+        world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
 
     }
 

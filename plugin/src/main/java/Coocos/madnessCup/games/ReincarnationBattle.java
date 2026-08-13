@@ -24,6 +24,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -156,7 +158,6 @@ public class ReincarnationBattle extends Game implements Listener{
         ItemAdventurePredicate canBreak = ItemAdventurePredicate.itemAdventurePredicate().addPredicate(predicate).build();
         pickaxe.setData(DataComponentTypes.CAN_BREAK, canBreak);
         inv.setItem(1, pickaxe);
-        inv.setItem(2, new ItemStack(Material.COOKED_BEEF, 16));
 
         // Armor creation
         Color teamColor = info.getTeam().getCustomizeColor();
@@ -188,5 +189,14 @@ public class ReincarnationBattle extends Game implements Listener{
             info.addCoins(10);
             Bukkit.getLogger().info("Player " + player.getName() + " has coins " + info.getCoins());
         };
+    }
+
+    @EventHandler
+    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+        if (event.getEntity() instanceof Player player &&
+                players.containsKey(player.getUniqueId())) {
+
+            if (event.getFoodLevel() < player.getFoodLevel()) event.setCancelled(true);
+        }
     }
 }
