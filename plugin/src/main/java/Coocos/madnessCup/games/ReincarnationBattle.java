@@ -8,6 +8,7 @@ import Coocos.madnessCup.systems.Team;
 import Coocos.madnessCup.systems.managers.QueueManager;
 import Coocos.madnessCup.utils.Countdown;
 import Coocos.madnessCup.utils.ItemFactory;
+import Coocos.madnessCup.utils.MenuHandler;
 import io.papermc.paper.block.BlockPredicate;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemAdventurePredicate;
@@ -79,23 +80,31 @@ public class ReincarnationBattle extends Game implements Listener{
     public void endGame() {
         HandlerList.unregisterAll(this);
         this.isRunning = false;
+        MenuHandler menuHandler = new MenuHandler(plugin);
+        Location spawn = new Location(Bukkit.getWorld("world"), 8.5, -56, 8.5, 0, 0);
 
         for (UUID uuid : players.keySet()) {
             PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
             Player player = Bukkit.getPlayer(uuid);
+            player.sendMessage(ChatColor.GOLD + "GAME OVER");
             player.removeScoreboardTag("ingame");
             if (info != null && info.getTeam() != null)
                 plugin.getTeamManager().removePlayerFromTeam(
                         uuid, info.getTeam().getTeamName());
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                player.teleport(spawn);
+                menuHandler.defaultInventory(player);
+            });
         }
-
-        players.clear();
-        QueueManager queueManager = plugin.getQueueManager();
-        queueManager.removeQueue("reincarnation1");
-        Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
-        Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 3, 0);
-        queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
-
+        players.clear();;
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            QueueManager queueManager = plugin.getQueueManager();
+            queueManager.removeQueue("reincarnation1");
+            Bukkit.getLogger().info("[MadnessCup] Creating fresh reincarnation1 world");
+            Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
+            Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 1, 3, 0);
+            queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
+        },20L);
     }
 
     public void glassRemoval() {
@@ -109,7 +118,14 @@ public class ReincarnationBattle extends Game implements Listener{
 
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
-        players.put(event.getPlayer().getUniqueId(), players.get(event.getPlayer().getUniqueId()) - 1);
+        Player player = event.getPlayer();
+        players.put(player.getUniqueId(), players.get(player.getUniqueId()) - 1);
+        Location location = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            player.spigot().respawn();
+            player.teleport(location);
+        });
         if (isOneTeamLeft()) endGame();
     }
 
