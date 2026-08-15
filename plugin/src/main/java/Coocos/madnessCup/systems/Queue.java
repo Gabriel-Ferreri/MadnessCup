@@ -22,6 +22,7 @@ public class Queue {
     private final MadnessCup plugin;
     private String queueName;
     private Countdown countdown;
+    private Boolean isQueueStarting = false;
 
     public Queue(MadnessCup plugin, String queueName, Game game, List<UUID> players, int minCapacity, int maxCapacity, int currentCapacity) {
         this.plugin = plugin;
@@ -47,18 +48,15 @@ public class Queue {
     public void setMinCapacity(int minCapacity) {
         if (minCapacity > 1 && minCapacity <= maxCapacity)
             this.minCapacity = minCapacity;
-        else return;
     }
     public void setMaxCapacity(int maxCapacity) {
         if (maxCapacity > 1 && minCapacity <= maxCapacity)
             this.maxCapacity = maxCapacity;
-        else return;
     }
     public void addPlayer(UUID player) {
         this.players.add(player);
         this.currentCapacity++;
-        if (this.currentCapacity >= minCapacity)
-            queueStart(this.game);
+        if (this.currentCapacity >= minCapacity && !this.isQueueStarting) queueStart(this.game);
     }
 
     public void removePlayer(UUID player) {
@@ -69,6 +67,7 @@ public class Queue {
     }
 
     public void queueStart(Game game) {
+        this.isQueueStarting = true;
         countdown = new Countdown(plugin, players, 5) {
             @Override
             public void onFinish() {
@@ -97,6 +96,7 @@ public class Queue {
     public void queueCancel() {
         if (countdown != null) {
             countdown.cancel();
+            isQueueStarting = false;
             countdown = null;
         }
     }

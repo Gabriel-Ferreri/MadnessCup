@@ -1,6 +1,7 @@
 package Coocos.madnessCup.games;
 
 import Coocos.madnessCup.MadnessCup;
+import Coocos.madnessCup.games.reincarnationExtra.KitsHandling;
 import Coocos.madnessCup.systems.Game;
 import Coocos.madnessCup.systems.PlayerInfo;
 import Coocos.madnessCup.systems.Queue;
@@ -16,6 +17,7 @@ import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.keys.BlockTypeKeys;
 import io.papermc.paper.registry.set.RegistryKeySet;
 import io.papermc.paper.registry.set.RegistrySet;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.BlockType;
 import org.bukkit.enchantments.Enchantment;
@@ -37,13 +39,19 @@ import java.util.*;
 
 public class ReincarnationBattle extends Game implements Listener{
     Map<UUID, Integer> players = new HashMap<>();
+    private final Set<KitsHandling.Kit> selectedKits = new HashSet<>();
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
         super(plugin, teams, isRunning);
     }
 
     @Override
     public void startGame() {
+        if (isRunning) {
+            Bukkit.getLogger().warning("[MadnessCup] Tried to start an already running game!");
+            return;
+        }
         this.isRunning = true;
+        KitsHandling kitsHandling = new KitsHandling(plugin, selectedKits);
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Location redLocation = new Location(Bukkit.getWorld("reincarnation1"), -18.5, -54, 22.5, 0, 0);
         Location orangeLocation = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
@@ -61,7 +69,7 @@ public class ReincarnationBattle extends Game implements Listener{
                     case "Yellow Nerds" -> player.teleport(yellowLocation);
                     case "Lime Nerds" -> player.teleport(limeLocation);
                 }
-                givePlayersInventory(player);
+                kitsHandling.givePlayersInventory(player);
             }
         }
         Countdown countdown = new Countdown(plugin, new ArrayList<>(players.keySet()), 5) {
@@ -77,7 +85,6 @@ public class ReincarnationBattle extends Game implements Listener{
         countdown.start();
     }
 
-
     @Override
     public void endGame() {
         HandlerList.unregisterAll(this);
@@ -90,6 +97,7 @@ public class ReincarnationBattle extends Game implements Listener{
             Player player = Bukkit.getPlayer(uuid);
             player.sendMessage(ChatColor.GOLD + "GAME OVER");
             player.removeScoreboardTag("ingame");
+            player.setHealth(20);
             if (info != null && info.getTeam() != null)
                 plugin.getTeamManager().removePlayerFromTeam(
                         uuid, info.getTeam().getTeamName());
@@ -121,20 +129,44 @@ public class ReincarnationBattle extends Game implements Listener{
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getPlayer();
-        players.put(player.getUniqueId(), players.get(player.getUniqueId()) - 1);
+        UUID uuid = player.getUniqueId();
+        Integer lives = players.get(uuid);
+
+        //debug
+        if (lives == null) {
+            Bukkit.getLogger().warning("[MadnessCup] Player " + player.getName()
+                    + " died but was not in the ReincarnationBattle players map.");
+            return;
+        }
+
+        lives--;
+        players.put(uuid, lives);
+        Bukkit.getLogger().info("[MadnessCup] " + player.getName() + " now has " + lives + " lives.");
         Location location = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
 
         Bukkit.getScheduler().runTask(plugin, () -> {
             player.spigot().respawn();
             player.teleport(location);
+            lifeCheck(player);
+            if (isOneTeamLeft()) endGame();
         });
-        if (isOneTeamLeft()) endGame();
+    }
+
+    // Manages what happens if a player has 1 or 0 lives
+    private void lifeCheck(Player player) {
+        if (players.get(player.getUniqueId()) == 1) {
+            KitsHandling kitsHandling = new KitsHandling(plugin, selectedKits);
+            kitsHandling.startKitSelection(player);
+        }
+        if (players.get(player.getUniqueId()) == 0) {
+            player.setGameMode(GameMode.SPECTATOR);
+        }
     }
 
     private boolean isOneTeamLeft() {
         Team team = null;
         for (UUID uuid : players.keySet()) {
-            if (players.get(uuid) >= 2) {
+            if (players.get(uuid) > 0) {
                 PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
 
                 if (team == null) {
@@ -145,39 +177,6 @@ public class ReincarnationBattle extends Game implements Listener{
             }
         }
         return true;
-    }
-
-    public void givePlayersInventory(Player player) {
-        PlayerInfo info = plugin.getPlayerManager().getPlayer(player.getUniqueId());
-        Inventory inv = player.getInventory();
-        inv.clear();
-        inv.setItem(0, new ItemStack(Material.STONE_SWORD));
-        ItemStack pickaxe = new ItemStack(Material.IRON_PICKAXE);
-        // Pickaxe can break only raw gold
-        BlockPredicate predicate = BlockPredicate.predicate().blocks(RegistrySet.keySet(RegistryKey.BLOCK, BlockTypeKeys.RAW_GOLD_BLOCK)).build();
-        ItemAdventurePredicate canBreak = ItemAdventurePredicate.itemAdventurePredicate().addPredicate(predicate).build();
-        pickaxe.setData(DataComponentTypes.CAN_BREAK, canBreak);
-        inv.setItem(1, pickaxe);
-
-        // Armor creation
-        Color teamColor = info.getTeam().getCustomizeColor();
-        player.getInventory().setBoots(customizeArmor(Material.LEATHER_BOOTS, teamColor));
-        player.getInventory().setLeggings(customizeArmor(Material.LEATHER_LEGGINGS, teamColor));
-        player.getInventory().setChestplate(customizeArmor(Material.LEATHER_CHESTPLATE, teamColor));
-        player.getInventory().setHelmet(customizeArmor(Material.LEATHER_HELMET, teamColor));
-
-    }
-
-    private ItemStack customizeArmor(Material material, Color color) {
-        ItemStack item = new ItemStack(material);
-        LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
-
-        meta.setColor(color);
-        item.setItemMeta(meta);
-
-        item.addUnsafeEnchantment(Enchantment.PROTECTION, 2);
-        item.addUnsafeEnchantment(Enchantment.BINDING_CURSE, 1);
-        return item;
     }
 
     @EventHandler
@@ -195,7 +194,6 @@ public class ReincarnationBattle extends Game implements Listener{
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player player &&
                 players.containsKey(player.getUniqueId())) {
-
             if (event.getFoodLevel() < player.getFoodLevel()) event.setCancelled(true);
         }
     }

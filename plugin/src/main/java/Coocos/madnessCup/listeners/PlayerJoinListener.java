@@ -3,10 +3,7 @@ package Coocos.madnessCup.listeners;
 import Coocos.madnessCup.MadnessCup;
 import Coocos.madnessCup.systems.managers.PlayerManager;
 import Coocos.madnessCup.utils.DirectoryManager;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -39,6 +36,7 @@ public class PlayerJoinListener implements Listener {
         Random random = new Random();
         String playerName = player.getName();
         player.setFoodLevel(20);
+        player.setHealth(20);
         Location gameLocation = new Location(
                 Bukkit.getWorld("World"), 8.5, -56, 8.5, 0, 0);
         player.teleport(gameLocation);

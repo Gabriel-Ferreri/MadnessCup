@@ -1,5 +1,6 @@
 package Coocos.madnessCup;
 
+import Coocos.madnessCup.games.reincarnationExtra.KitsHandling;
 import Coocos.madnessCup.systems.Game;
 import Coocos.madnessCup.systems.PlayerInfo;
 import Coocos.madnessCup.systems.Queue;
@@ -24,6 +25,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -75,6 +77,7 @@ public final class MadnessCup extends JavaPlugin {
         playerManager = new PlayerManager();
 
         //Event Listeners
+        getServer().getPluginManager().registerEvents(new KitsHandling(this, new HashSet<>()), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new MenuHandler(this), this);
     }
@@ -116,7 +119,6 @@ public final class MadnessCup extends JavaPlugin {
         world.setGameRule(GameRules.BLOCK_DROPS, false);
         world.setGameRule(GameRules.ENTITY_DROPS, false);
         world.setGameRule(GameRules.NATURAL_HEALTH_REGENERATION, false);
-
     }
 
     public void testBackend() {
