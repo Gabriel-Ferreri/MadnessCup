@@ -77,7 +77,6 @@ public final class MadnessCup extends JavaPlugin {
         playerManager = new PlayerManager();
 
         //Event Listeners
-        getServer().getPluginManager().registerEvents(new KitsHandling(this, new HashSet<>()), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(this), this);
         getServer().getPluginManager().registerEvents(new MenuHandler(this), this);
     }

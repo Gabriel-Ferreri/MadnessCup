@@ -40,8 +40,10 @@ import java.util.*;
 public class ReincarnationBattle extends Game implements Listener{
     Map<UUID, Integer> players = new HashMap<>();
     private final Set<KitsHandling.Kit> selectedKits = new HashSet<>();
+    private final KitsHandling kitsHandling;
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
         super(plugin, teams, isRunning);
+        this.kitsHandling = new KitsHandling(plugin, selectedKits);
     }
 
     @Override
@@ -51,8 +53,8 @@ public class ReincarnationBattle extends Game implements Listener{
             return;
         }
         this.isRunning = true;
-        KitsHandling kitsHandling = new KitsHandling(plugin, selectedKits);
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(kitsHandling, plugin);
         Location redLocation = new Location(Bukkit.getWorld("reincarnation1"), -18.5, -54, 22.5, 0, 0);
         Location orangeLocation = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
         Location yellowLocation = new Location(Bukkit.getWorld("reincarnation1"), 24.5, -54, -15.5, 0, 0);
@@ -87,6 +89,7 @@ public class ReincarnationBattle extends Game implements Listener{
 
     @Override
     public void endGame() {
+        HandlerList.unregisterAll(kitsHandling);
         HandlerList.unregisterAll(this);
         this.isRunning = false;
         MenuHandler menuHandler = new MenuHandler(plugin);
@@ -155,7 +158,6 @@ public class ReincarnationBattle extends Game implements Listener{
     // Manages what happens if a player has 1 or 0 lives
     private void lifeCheck(Player player) {
         if (players.get(player.getUniqueId()) == 1) {
-            KitsHandling kitsHandling = new KitsHandling(plugin, selectedKits);
             kitsHandling.startKitSelection(player);
         }
         if (players.get(player.getUniqueId()) == 0) {
