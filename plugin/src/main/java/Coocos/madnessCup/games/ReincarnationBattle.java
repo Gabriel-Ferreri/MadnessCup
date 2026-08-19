@@ -102,6 +102,8 @@ public class ReincarnationBattle extends Game implements Listener{
             player.removeScoreboardTag("ingame");
             player.setHealth(20);
             player.setGameMode(GameMode.ADVENTURE);
+            Bukkit.getLogger().info("[MadnessCup] Player " + player.getName() + " has " + info.getCoins() + " coins!");
+            info.reset();
             if (info != null && info.getTeam() != null)
                 plugin.getTeamManager().removePlayerFromTeam(
                         uuid, info.getTeam().getTeamName());
@@ -141,6 +143,14 @@ public class ReincarnationBattle extends Game implements Listener{
             Bukkit.getLogger().warning("[MadnessCup] Player " + player.getName()
                     + " died but was not in the ReincarnationBattle players map.");
             return;
+        }
+        PlayerInfo playerInfo = plugin.getPlayerManager().getPlayer(uuid);
+        playerInfo.addDeath();
+        Player killer = player.getKiller();
+        if (killer != null) {
+            PlayerInfo killerInfo = plugin.getPlayerManager().getPlayer(uuid);
+            killerInfo.addKill();
+            killerInfo.addCoins(50);
         }
 
         lives--;

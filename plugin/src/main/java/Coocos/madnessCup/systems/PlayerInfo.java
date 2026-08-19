@@ -24,7 +24,13 @@ public class PlayerInfo {
     public int getDeaths() { return deaths; }
 
     public void setTeam(Team team) { this.team = team; }
+    public void setCoins(int coins) { this.coins = coins; }
+    public void setKills(int kills) { this.kills = kills; }
+    public void setDeaths(int deaths) { this.deaths = deaths; }
+
     public void addCoins(int amount) { this.coins += amount; }
     public void addKill() { this.kills++; }
     public void addDeath() { this.deaths++; }
+
+    public void reset() { coins = 0; kills = 0; deaths = 0; }
 }

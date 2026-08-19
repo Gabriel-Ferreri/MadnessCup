@@ -195,7 +195,7 @@ public class KitsHandling implements Listener {
         ItemStack sword = new ItemStack(Material.STONE_SWORD);
         sword.addUnsafeEnchantment(Enchantment.SHARPNESS, 1);
         inv.setItem(0, sword);
-        ItemStack potion = new ItemStack(Material.POTION);
+        ItemStack potion = new ItemStack(Material.SPLASH_POTION);
         PotionMeta meta = (PotionMeta) potion.getItemMeta();
         meta.setBasePotionType(PotionType.STRONG_HEALING);
         potion.setItemMeta(meta);
