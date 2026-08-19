@@ -101,6 +101,7 @@ public class ReincarnationBattle extends Game implements Listener{
             player.sendMessage(ChatColor.GOLD + "GAME OVER");
             player.removeScoreboardTag("ingame");
             player.setHealth(20);
+            player.setGameMode(GameMode.ADVENTURE);
             if (info != null && info.getTeam() != null)
                 plugin.getTeamManager().removePlayerFromTeam(
                         uuid, info.getTeam().getTeamName());
