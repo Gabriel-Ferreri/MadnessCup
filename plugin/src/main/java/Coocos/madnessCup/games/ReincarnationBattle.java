@@ -39,11 +39,10 @@ import java.util.*;
 
 public class ReincarnationBattle extends Game implements Listener{
     Map<UUID, Integer> players = new HashMap<>();
-    private final Set<KitsHandling.Kit> selectedKits = new HashSet<>();
     private final KitsHandling kitsHandling;
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
         super(plugin, teams, isRunning);
-        this.kitsHandling = new KitsHandling(plugin, selectedKits);
+        this.kitsHandling = new KitsHandling(plugin);
     }
 
     @Override
@@ -74,6 +73,7 @@ public class ReincarnationBattle extends Game implements Listener{
                 kitsHandling.givePlayersInventory(player);
             }
         }
+        kitsHandling.initialize(players.size());
         Countdown countdown = new Countdown(plugin, new ArrayList<>(players.keySet()), 5) {
             @Override
             public void onFinish() {

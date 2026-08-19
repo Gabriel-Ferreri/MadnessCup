@@ -33,16 +33,23 @@ import java.util.*;
  */
 public class KitsHandling implements Listener {
     private final MadnessCup plugin;
-    private final Set<Kit> selectedKits;
     private final Map<UUID, Kit> playerChoices = new HashMap<>();
+    private final Map<Kit, Integer> kitCounts = new EnumMap<>(Kit.class);
+    private int maxPerKit;
 
     public enum Kit {
         SWORDSMAN, TANK, LUMBERJACK, UTILITY
     }
 
-    public KitsHandling(MadnessCup plugin, Set<Kit> selectedKits) {
+    public KitsHandling(MadnessCup plugin) {
         this.plugin = plugin;
-        this.selectedKits = selectedKits;
+        for (Kit kit : Kit.values()) kitCounts.put(kit, 0);
+    }
+
+    public void initialize(int playerCount) {
+        this.maxPerKit = (int) Math.ceil(
+                (double) playerCount / Kit.values().length
+        );
     }
 
     public void givePlayersInventory(Player player) {
@@ -75,8 +82,20 @@ public class KitsHandling implements Listener {
             UUID uuid = player.getUniqueId();
             Kit chosenKit = playerChoices.get(uuid);
 
-            if (chosenKit == null) chosenKit = Kit.SWORDSMAN; //default kit
-            selectedKits.add(chosenKit);
+            if (chosenKit == null) {
+                for (Kit kit : Kit.values()) {
+                    if (kitCounts.get(kit) < maxPerKit) {
+                        chosenKit = kit;
+                        break;
+                    }
+                }
+            }
+            if (chosenKit == null) {
+                Bukkit.getLogger().warning("[MadnessCup] No kit available for " + player.getName());
+                player.setGameMode(GameMode.ADVENTURE);
+                return;
+            }
+            kitCounts.put(chosenKit, kitCounts.get(chosenKit) + 1);
             switch (chosenKit) {
                 case SWORDSMAN -> swordsmanKit(player);
                 case TANK -> tankKit(player);
@@ -86,23 +105,32 @@ public class KitsHandling implements Listener {
 
             playerChoices.remove(uuid);
             player.setGameMode(GameMode.ADVENTURE);
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            Location newLocation = null;
+            switch (info.getTeam().getTeamName()) {
+                case "Red Nerds" -> newLocation = new Location(Bukkit.getWorld("reincarnation1"), -18.5, -54, 22.5, 0, 0);
+                case "Orange Nerds" -> newLocation = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
+                case "Yellow Nerds" -> newLocation = new Location(Bukkit.getWorld("reincarnation1"), 24.5, -54, -15.5, 0, 0);
+                case "Lime Nerds" -> newLocation = new Location(Bukkit.getWorld("reincarnation1"), 22.5, -54, 24.5, 0, 0);
+            }
+            if ( newLocation != null ) player.teleport(newLocation);
         }, 160L);
     }
 
     public void openChoice(Player player) {
         Inventory inv = Bukkit.createInventory(null, 9,
                 Component.text("Choose your kit"));
-        //Swordsman
-        if (selectedKits.contains(Kit.SWORDSMAN)) inv.setItem(2, createKitItem(Material.BARRIER, "Swordsman - Taken"));
+        // Swordsman
+        if (kitCounts.get(Kit.SWORDSMAN) >= maxPerKit) inv.setItem(2, createKitItem(Material.BARRIER, "Swordsman - Taken"));
         else inv.setItem(2, createKitItem(Material.IRON_SWORD, "Swordsman"));
-        //Tank
-        if (selectedKits.contains(Kit.TANK)) inv.setItem(3, createKitItem(Material.BARRIER, "Tank - Taken"));
+        // Tank
+        if (kitCounts.get(Kit.TANK) >= maxPerKit) inv.setItem(3, createKitItem(Material.BARRIER, "Tank - Taken"));
         else inv.setItem(3, createKitItem(Material.SHIELD, "Tank"));
-        //Lumberjack
-        if (selectedKits.contains(Kit.LUMBERJACK)) inv.setItem(5, createKitItem(Material.BARRIER, "Lumberjack - Taken"));
+        // Lumberjack
+        if (kitCounts.get(Kit.LUMBERJACK) >= maxPerKit) inv.setItem(5, createKitItem(Material.BARRIER, "Lumberjack - Taken"));
         else inv.setItem(5, createKitItem(Material.IRON_AXE, "Lumberjack"));
-        //Utility
-        if (selectedKits.contains(Kit.UTILITY)) inv.setItem(6, createKitItem(Material.BARRIER, "Utility - Taken"));
+        // Utility
+        if (kitCounts.get(Kit.UTILITY) >= maxPerKit) inv.setItem(6, createKitItem(Material.BARRIER, "Utility - Taken"));
         else inv.setItem(6, createKitItem(Material.TOTEM_OF_UNDYING, "Utility"));
         player.openInventory(inv);
     }
@@ -137,22 +165,22 @@ public class KitsHandling implements Listener {
 
         switch (event.getSlot()) {
             case 2 -> {
-                if (selectedKits.contains(Kit.SWORDSMAN)) return;
+                if (kitCounts.get(Kit.SWORDSMAN) >= maxPerKit) return;
                 playerChoices.put(player.getUniqueId(), Kit.SWORDSMAN);
                 swordsmanKit(player);
             }
             case 3 -> {
-                if (selectedKits.contains(Kit.TANK)) return;
+                if (kitCounts.get(Kit.TANK) >= maxPerKit) return;
                 playerChoices.put(player.getUniqueId(), Kit.TANK);
                 tankKit(player);
             }
             case 5 -> {
-                if (selectedKits.contains(Kit.LUMBERJACK)) return;
+                if (kitCounts.get(Kit.LUMBERJACK) >= maxPerKit) return;
                 playerChoices.put(player.getUniqueId(), Kit.LUMBERJACK);
                 lumbermanKit(player);
             }
             case 6 -> {
-                if (selectedKits.contains(Kit.UTILITY)) return;
+                if (kitCounts.get(Kit.UTILITY) >= maxPerKit) return;
                 playerChoices.put(player.getUniqueId(), Kit.UTILITY);
                 utilityKit(player);
             }
