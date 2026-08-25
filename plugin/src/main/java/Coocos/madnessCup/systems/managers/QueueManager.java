@@ -37,7 +37,7 @@ public class QueueManager {
         if (queue == null) return;
         org.bukkit.World world = Bukkit.getWorld(worldName);
         if (world != null) Bukkit.unloadWorld(world, false);
-        DirectoryManager.deleteDimension(worldName);
+        DirectoryManager.deleteDimension(worldName); //Comment this line to modify world
     }
 
     public Collection<Queue> getAllQueues() {

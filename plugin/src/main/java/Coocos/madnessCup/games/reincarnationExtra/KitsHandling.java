@@ -59,7 +59,7 @@ public class KitsHandling implements Listener {
         inv.setItem(0, new ItemStack(Material.STONE_SWORD));
         ItemStack pickaxe = new ItemStack(Material.IRON_PICKAXE);
         // Pickaxe can break only raw gold
-        BlockPredicate predicate = BlockPredicate.predicate().blocks(RegistrySet.keySet(RegistryKey.BLOCK, BlockTypeKeys.RAW_GOLD_BLOCK)).build();
+        BlockPredicate predicate = BlockPredicate.predicate().blocks(RegistrySet.keySet(RegistryKey.BLOCK, BlockTypeKeys.RAW_GOLD_BLOCK,BlockTypeKeys.GOLD_BLOCK)).build();
         ItemAdventurePredicate canBreak = ItemAdventurePredicate.itemAdventurePredicate().addPredicate(predicate).build();
         pickaxe.setData(DataComponentTypes.CAN_BREAK, canBreak);
         inv.setItem(1, pickaxe);

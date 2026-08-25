@@ -38,7 +38,7 @@ import org.jspecify.annotations.Nullable;
 import java.util.*;
 
 public class ReincarnationBattle extends Game implements Listener{
-    Map<UUID, Integer> players = new HashMap<>();
+    Map<UUID, Integer> players = new HashMap<>(); // Lives left
     private final KitsHandling kitsHandling;
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
         super(plugin, teams, isRunning);
@@ -89,6 +89,7 @@ public class ReincarnationBattle extends Game implements Listener{
 
     @Override
     public void endGame() {
+        winnerCalculator();
         HandlerList.unregisterAll(kitsHandling);
         HandlerList.unregisterAll(this);
         this.isRunning = false;
@@ -98,7 +99,6 @@ public class ReincarnationBattle extends Game implements Listener{
         for (UUID uuid : players.keySet()) {
             PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
             Player player = Bukkit.getPlayer(uuid);
-            player.sendMessage(ChatColor.GOLD + "GAME OVER");
             player.removeScoreboardTag("ingame");
             player.setHealth(20);
             player.setGameMode(GameMode.ADVENTURE);
@@ -123,6 +123,44 @@ public class ReincarnationBattle extends Game implements Listener{
         },20L);
     }
 
+    /**
+     * Calculate the points scored by each team at the end of the game and print
+     * the results
+     */
+    public void winnerCalculator() {
+        HashMap<Team, Integer> teamPoints = new HashMap<>();
+        for (Team team : this.teams) {
+            int currentPoints = 0;
+            for (UUID uuid : team.getPlayers()) {
+                PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+                currentPoints += info.getCoins();
+            }
+            teamPoints.put(team, currentPoints);
+        }
+        List<Map.Entry<Team, Integer>> sortedTeams = new ArrayList<>(teamPoints.entrySet());
+        sortedTeams.sort(Map.Entry.<Team, Integer>comparingByValue().reversed());
+        Bukkit.broadcastMessage(ChatColor.GOLD + "The Reincarnation Battle has finished!");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "The Final Standings are... ");
+        for (Player player : Bukkit.getOnlinePlayers())
+            player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 4.0f, 1.0f);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            int position = 1;
+            for (Map.Entry<Team, Integer> entry : sortedTeams) {
+                Team team = entry.getKey();
+                int points = entry.getValue();
+                if (position == 1) Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: "
+                        + team.getTeamName() + " - " + points + " points!");
+                else Bukkit.broadcastMessage(team.getTeamColor() + " " + position + ". " + team.getTeamName() + " - " + points + " points");
+                position++;
+            }
+            for (Player player : Bukkit.getOnlinePlayers())
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+        }, 60L);
+    }
+
+    /**
+     * Removes glass in the only current map.
+     */
     public void glassRemoval() {
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback false");
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill -16 -52 24 -21 -54 20 air replace red_stained_glass");
@@ -147,8 +185,9 @@ public class ReincarnationBattle extends Game implements Listener{
         PlayerInfo playerInfo = plugin.getPlayerManager().getPlayer(uuid);
         playerInfo.addDeath();
         Player killer = player.getKiller();
+        UUID killerUuid = player.getUniqueId();
         if (killer != null) {
-            PlayerInfo killerInfo = plugin.getPlayerManager().getPlayer(uuid);
+            PlayerInfo killerInfo = plugin.getPlayerManager().getPlayer(killerUuid);
             killerInfo.addKill();
             killerInfo.addCoins(50);
         }
@@ -166,8 +205,11 @@ public class ReincarnationBattle extends Game implements Listener{
         });
     }
 
-    // Manages what happens if a player has 1 or 0 lives
-    private void lifeCheck(Player player) {
+    /**
+     * Manages what happens if a player has 1 or 0 lives
+     * @param player player being checked
+     */
+     private void lifeCheck(Player player) {
         if (players.get(player.getUniqueId()) == 1) {
             kitsHandling.startKitSelection(player);
         }
@@ -176,6 +218,9 @@ public class ReincarnationBattle extends Game implements Listener{
         }
     }
 
+    /**
+     * Checks if only one team is left
+     */
     private boolean isOneTeamLeft() {
         Team team = null;
         for (UUID uuid : players.keySet()) {
@@ -192,17 +237,28 @@ public class ReincarnationBattle extends Game implements Listener{
         return true;
     }
 
+    /**
+     * Checks when a player breaks a block that gives points and adds them.
+     * @param event the block break event
+     */
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
+        PlayerInfo info = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         if (event.getBlock().getType() == Material.RAW_GOLD_BLOCK &&
                 players.containsKey(player.getUniqueId())) {
-            PlayerInfo info = plugin.getPlayerManager().getPlayer(player.getUniqueId());
             info.addCoins(10);
-            Bukkit.getLogger().info("Player " + player.getName() + " has coins " + info.getCoins());
         };
+        if (event.getBlock().getType() == Material.GOLD_BLOCK &&
+                players.containsKey(player.getUniqueId())) {
+            info.addCoins(30);
+        }
     }
 
+    /**
+     * Prevents players in the current game from losing hunger.
+     * @param event the food level change event
+     */
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player player &&
