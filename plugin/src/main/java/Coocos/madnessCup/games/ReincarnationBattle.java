@@ -103,7 +103,7 @@ public class ReincarnationBattle extends Game implements Listener{
                 Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 12, 0);
                 queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
             },20L);
-        }, 80L);
+        }, 160L);
     }
 
     /**
@@ -122,21 +122,13 @@ public class ReincarnationBattle extends Game implements Listener{
         }
         List<Map.Entry<Team, Integer>> sortedTeams = new ArrayList<>(teamPoints.entrySet());
         sortedTeams.sort(Map.Entry.<Team, Integer>comparingByValue().reversed());
-        Bukkit.broadcastMessage(ChatColor.WHITE + "---------------------------------");
+        Bukkit.broadcastMessage(ChatColor.WHITE + " ");
         Bukkit.broadcastMessage(ChatColor.GOLD + "The Reincarnation Battle has finished!");
         Bukkit.broadcastMessage(ChatColor.GOLD + "The Final Standings are... ");
+        Bukkit.broadcastMessage(ChatColor.WHITE + " ");
         for (Player player : Bukkit.getOnlinePlayers())
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 4.0f, 1.0f);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            int position = 1;
-            for (Map.Entry<Team, Integer> entry : sortedTeams) {
-                Team team = entry.getKey();
-                int points = entry.getValue();
-                if (position == 1) Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: "
-                        + team.getTeamName() + " - " + points + " points!");
-                else Bukkit.broadcastMessage(team.getTeamColor() + " " + position + ". " + team.getTeamName() + " - " + points + " points");
-                position++;
-            }
             // Individual player standings
             Bukkit.broadcastMessage("");
             Bukkit.broadcastMessage(ChatColor.GOLD + "Individual Standings:");
@@ -148,7 +140,7 @@ public class ReincarnationBattle extends Game implements Listener{
                 sortedPlayers.add(Map.entry(uuid, info.getCoins()));
             }
             sortedPlayers.sort(Map.Entry.<UUID, Integer>comparingByValue().reversed());
-            position = 1;
+            int position = 1;
 
             for (Map.Entry<UUID, Integer> entry : sortedPlayers) {
                 UUID uuid = entry.getKey();
@@ -157,8 +149,20 @@ public class ReincarnationBattle extends Game implements Listener{
                 Bukkit.broadcastMessage(ChatColor.WHITE + " " + position + ". " + player.getName() + " - " + points + " points");
                 position++;
             }
+            Bukkit.broadcastMessage("");
+            Bukkit.broadcastMessage(ChatColor.GOLD + "Team Standings:");
+            position = 1;
+            for (Map.Entry<Team, Integer> entry : sortedTeams) {
+                Team team = entry.getKey();
+                int points = entry.getValue();
+                if (position == 1) Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: "
+                        + team.getTeamName() + " - " + points + " points!");
+                else Bukkit.broadcastMessage(team.getTeamColor() + " " + position + ". " + team.getTeamName() + " - " + points + " points");
+                position++;
+            }
+            Bukkit.broadcastMessage(ChatColor.WHITE + " ");
             for (Player player : Bukkit.getOnlinePlayers())
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1.0f, 1.0f);
 
         }, 60L);
 
@@ -190,6 +194,8 @@ public class ReincarnationBattle extends Game implements Listener{
             killerInfo.addKill();
             killerInfo.addCoins(50);
             killer.sendMessage(ChatColor.GOLD + "⚔ You get +50 points for killing " + player.getName() + "!");
+            killer.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+
         }
         lives--;
         players.put(uuid, lives);
@@ -205,7 +211,7 @@ public class ReincarnationBattle extends Game implements Listener{
                 awardKillBonus();
                 int reward = 150/lastTeam.getPlayers().size();
                 Bukkit.broadcastMessage(lastTeam.getTeamColor() + "🏆 "
-                                + lastTeam.getTeamName() + " wins the Reincarnation Battle!");
+                                + lastTeam.getTeamName() + " was the last team standing!");
                 Bukkit.broadcastMessage(lastTeam.getTeamColor()
                         + "Winning team reward: +" + reward + " points per player!");
                 for (UUID teamPlayer : lastTeam.getPlayers()) {
@@ -305,11 +311,13 @@ public class ReincarnationBattle extends Game implements Listener{
                 players.containsKey(player.getUniqueId())) {
             info.addCoins(10);
             player.sendMessage(ChatColor.GOLD + "+10 points!");
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
         };
         if (event.getBlock().getType() == Material.GOLD_BLOCK &&
                 players.containsKey(player.getUniqueId())) {
             info.addCoins(30);
             player.sendMessage(ChatColor.GOLD + "+30 points!");
+            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
         }
     }
 

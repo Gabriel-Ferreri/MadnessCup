@@ -4,6 +4,7 @@ import Coocos.madnessCup.MadnessCup;
 import Coocos.madnessCup.systems.PlayerInfo;
 import io.papermc.paper.block.BlockPredicate;
 import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.DamageResistant;
 import io.papermc.paper.datacomponent.item.ItemAdventurePredicate;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.keys.BlockTypeKeys;
@@ -23,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
 import java.util.*;
@@ -105,6 +107,8 @@ public class KitsHandling implements Listener {
 
             playerChoices.remove(uuid);
             player.setGameMode(GameMode.ADVENTURE);
+            player.sendMessage(ChatColor.GOLD + "You are now immune for 5 seconds");
+            player.setNoDamageTicks(100);
             PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
             Location newLocation = null;
             switch (info.getTeam().getTeamName()) {
