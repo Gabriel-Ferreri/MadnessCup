@@ -47,7 +47,7 @@ public final class MadnessCup extends JavaPlugin {
         queueManager = new QueueManager();
 
         Game reincarnation = new ReincarnationBattle(this, new ArrayList<>(), false);
-        Queue reincarnationQueue = new Queue(this, "reincarnation1", reincarnation, new ArrayList<>(), 1, 3, 0);
+        Queue reincarnationQueue = new Queue(this, "reincarnation1", reincarnation, new ArrayList<>(), 2, 12, 0);
         queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
 
         // Delay team setup until the server is fully ready

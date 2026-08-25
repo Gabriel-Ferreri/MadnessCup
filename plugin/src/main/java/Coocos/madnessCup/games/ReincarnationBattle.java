@@ -8,33 +8,15 @@ import Coocos.madnessCup.systems.Queue;
 import Coocos.madnessCup.systems.Team;
 import Coocos.madnessCup.systems.managers.QueueManager;
 import Coocos.madnessCup.utils.Countdown;
-import Coocos.madnessCup.utils.ItemFactory;
 import Coocos.madnessCup.utils.MenuHandler;
-import io.papermc.paper.block.BlockPredicate;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemAdventurePredicate;
-import io.papermc.paper.registry.RegistryKey;
-import io.papermc.paper.registry.keys.BlockTypeKeys;
-import io.papermc.paper.registry.set.RegistryKeySet;
-import io.papermc.paper.registry.set.RegistrySet;
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
-import org.bukkit.block.BlockType;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.jspecify.annotations.Nullable;
-
 import java.util.*;
 
 public class ReincarnationBattle extends Game implements Listener{
@@ -95,32 +77,33 @@ public class ReincarnationBattle extends Game implements Listener{
         this.isRunning = false;
         MenuHandler menuHandler = new MenuHandler(plugin);
         Location spawn = new Location(Bukkit.getWorld("world"), 8.5, -56, 8.5, 0, 0);
-
-        for (UUID uuid : players.keySet()) {
-            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
-            Player player = Bukkit.getPlayer(uuid);
-            player.removeScoreboardTag("ingame");
-            player.setHealth(20);
-            player.setGameMode(GameMode.ADVENTURE);
-            Bukkit.getLogger().info("[MadnessCup] Player " + player.getName() + " has " + info.getCoins() + " coins!");
-            info.reset();
-            if (info != null && info.getTeam() != null)
-                plugin.getTeamManager().removePlayerFromTeam(
-                        uuid, info.getTeam().getTeamName());
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                player.teleport(spawn);
-                menuHandler.defaultInventory(player);
-            });
-        }
-        players.clear();;
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            QueueManager queueManager = plugin.getQueueManager();
-            queueManager.removeQueue("reincarnation1");
-            Bukkit.getLogger().info("[MadnessCup] Creating fresh reincarnation1 world");
-            Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
-            Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 1, 3, 0);
-            queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
-        },20L);
+            for (UUID uuid : players.keySet()) {
+                PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+                Player player = Bukkit.getPlayer(uuid);
+                player.removeScoreboardTag("ingame");
+                player.setHealth(20);
+                player.setGameMode(GameMode.ADVENTURE);
+                Bukkit.getLogger().info("[MadnessCup] Player " + player.getName() + " has " + info.getCoins() + " coins!");
+                info.reset();
+                if (info != null && info.getTeam() != null)
+                    plugin.getTeamManager().removePlayerFromTeam(
+                            uuid, info.getTeam().getTeamName());
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    player.teleport(spawn);
+                    menuHandler.defaultInventory(player);
+                });
+            }
+            players.clear();;
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                QueueManager queueManager = plugin.getQueueManager();
+                queueManager.removeQueue("reincarnation1");
+                Bukkit.getLogger().info("[MadnessCup] Creating fresh reincarnation1 world");
+                Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
+                Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 12, 0);
+                queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
+            },20L);
+        }, 80L);
     }
 
     /**
@@ -139,6 +122,7 @@ public class ReincarnationBattle extends Game implements Listener{
         }
         List<Map.Entry<Team, Integer>> sortedTeams = new ArrayList<>(teamPoints.entrySet());
         sortedTeams.sort(Map.Entry.<Team, Integer>comparingByValue().reversed());
+        Bukkit.broadcastMessage(ChatColor.WHITE + "---------------------------------");
         Bukkit.broadcastMessage(ChatColor.GOLD + "The Reincarnation Battle has finished!");
         Bukkit.broadcastMessage(ChatColor.GOLD + "The Final Standings are... ");
         for (Player player : Bukkit.getOnlinePlayers())
@@ -153,9 +137,31 @@ public class ReincarnationBattle extends Game implements Listener{
                 else Bukkit.broadcastMessage(team.getTeamColor() + " " + position + ". " + team.getTeamName() + " - " + points + " points");
                 position++;
             }
+            // Individual player standings
+            Bukkit.broadcastMessage("");
+            Bukkit.broadcastMessage(ChatColor.GOLD + "Individual Standings:");
+
+            List<Map.Entry<UUID, Integer>> sortedPlayers = new ArrayList<>();
+
+            for (UUID uuid : players.keySet()) {
+                PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+                sortedPlayers.add(Map.entry(uuid, info.getCoins()));
+            }
+            sortedPlayers.sort(Map.Entry.<UUID, Integer>comparingByValue().reversed());
+            position = 1;
+
+            for (Map.Entry<UUID, Integer> entry : sortedPlayers) {
+                UUID uuid = entry.getKey();
+                int points = entry.getValue();
+                Player player = Bukkit.getPlayer(uuid);
+                Bukkit.broadcastMessage(ChatColor.WHITE + " " + position + ". " + player.getName() + " - " + points + " points");
+                position++;
+            }
             for (Player player : Bukkit.getOnlinePlayers())
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.0f);
+
         }, 60L);
+
     }
 
     /**
@@ -175,23 +181,16 @@ public class ReincarnationBattle extends Game implements Listener{
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         Integer lives = players.get(uuid);
-
-        //debug
-        if (lives == null) {
-            Bukkit.getLogger().warning("[MadnessCup] Player " + player.getName()
-                    + " died but was not in the ReincarnationBattle players map.");
-            return;
-        }
         PlayerInfo playerInfo = plugin.getPlayerManager().getPlayer(uuid);
         playerInfo.addDeath();
         Player killer = player.getKiller();
-        UUID killerUuid = player.getUniqueId();
+        UUID killerUuid = killer.getUniqueId();
         if (killer != null) {
             PlayerInfo killerInfo = plugin.getPlayerManager().getPlayer(killerUuid);
             killerInfo.addKill();
             killerInfo.addCoins(50);
+            killer.sendMessage(ChatColor.GOLD + "⚔ You get +50 points for killing " + player.getName() + "!");
         }
-
         lives--;
         players.put(uuid, lives);
         Bukkit.getLogger().info("[MadnessCup] " + player.getName() + " now has " + lives + " lives.");
@@ -201,8 +200,64 @@ public class ReincarnationBattle extends Game implements Listener{
             player.spigot().respawn();
             player.teleport(location);
             lifeCheck(player);
-            if (isOneTeamLeft()) endGame();
+            Team lastTeam = getLastTeamStanding();
+            if (lastTeam != null) {
+                awardKillBonus();
+                int reward = 150/lastTeam.getPlayers().size();
+                Bukkit.broadcastMessage(lastTeam.getTeamColor() + "🏆 "
+                                + lastTeam.getTeamName() + " wins the Reincarnation Battle!");
+                Bukkit.broadcastMessage(lastTeam.getTeamColor()
+                        + "Winning team reward: +" + reward + " points per player!");
+                for (UUID teamPlayer : lastTeam.getPlayers()) {
+                    PlayerInfo info = plugin.getPlayerManager().getPlayer(teamPlayer);
+                    info.addCoins(reward);
+                }
+                endGame();
+            }
         });
+    }
+
+    /**
+     * Give the top killer(s) of the game extra points
+     */
+    private void awardKillBonus() {
+        int highestKills = -1;
+        List<UUID> topKillers = new ArrayList<>();
+
+        for (UUID uuid : players.keySet()) {
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            int kills = info.getKills();
+            if (kills > highestKills) {
+                highestKills = kills;
+                topKillers.clear();
+                topKillers.add(uuid);
+            } else if (kills == highestKills) {
+                topKillers.add(uuid);
+            }
+        }
+
+        if (topKillers.isEmpty()) return;
+        int reward = 50 / topKillers.size();
+        if (topKillers.size() == 1) {
+            UUID uuid = topKillers.get(0);
+            Player player = Bukkit.getPlayer(uuid);
+            Bukkit.broadcastMessage(ChatColor.RED + "⚔ " + player.getName()
+                    + " had the most kills with " + highestKills + " kills!");
+            Bukkit.broadcastMessage(ChatColor.GOLD + player.getName()
+                            + " receives +" + reward + " bonus points!");
+        } else {
+            Bukkit.broadcastMessage(ChatColor.RED + "⚔ " + "There is a draw for most kills! "
+                            + "Each player receives +" + reward + " points.");
+            for (UUID uuid : topKillers) {
+                Player player = Bukkit.getPlayer(uuid);
+                Bukkit.broadcastMessage(ChatColor.GOLD + player.getName()
+                                + " receives +" + reward + " bonus points!");
+            }
+        }
+        for (UUID uuid : topKillers) {
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            info.addCoins(reward);
+        }
     }
 
     /**
@@ -219,22 +274,23 @@ public class ReincarnationBattle extends Game implements Listener{
     }
 
     /**
-     * Checks if only one team is left
+     * Gets the only team remaining in the game.
+     * Returns null if multiple teams are still alive.
      */
-    private boolean isOneTeamLeft() {
-        Team team = null;
+    private Team getLastTeamStanding() {
+        Team survivingTeam = null;
         for (UUID uuid : players.keySet()) {
             if (players.get(uuid) > 0) {
                 PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
 
-                if (team == null) {
-                    team = info.getTeam();
-                } else if (!team.equals(info.getTeam())) {
-                    return false;
+                if (survivingTeam == null) {
+                    survivingTeam = info.getTeam();
+                } else if (!survivingTeam.equals(info.getTeam())) {
+                    return null;
                 }
             }
         }
-        return true;
+        return survivingTeam;
     }
 
     /**
@@ -248,10 +304,12 @@ public class ReincarnationBattle extends Game implements Listener{
         if (event.getBlock().getType() == Material.RAW_GOLD_BLOCK &&
                 players.containsKey(player.getUniqueId())) {
             info.addCoins(10);
+            player.sendMessage(ChatColor.GOLD + "+10 points!");
         };
         if (event.getBlock().getType() == Material.GOLD_BLOCK &&
                 players.containsKey(player.getUniqueId())) {
             info.addCoins(30);
+            player.sendMessage(ChatColor.GOLD + "+30 points!");
         }
     }
 
