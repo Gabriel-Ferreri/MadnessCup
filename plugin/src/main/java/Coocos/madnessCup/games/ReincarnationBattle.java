@@ -19,9 +19,23 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import java.util.*;
 
+/**
+ * Represents the Reincarnation Battle minigame.
+ * This game mode gives each player 2 lives and tracks their performance
+ * throughout the match. The class manages game flow, player state,
+ * event handling, and kit assignment.
+ * @author Gabriel Ferreri
+ */
 public class ReincarnationBattle extends Game implements Listener{
     Map<UUID, Integer> players = new HashMap<>(); // Lives left
     private final KitsHandling kitsHandling;
+    /**
+     * Creates a new instance of the Reincarnation Battle game mode.
+     *
+     * @param plugin reference to the main MadnessCup plugin
+     * @param teams the teams participating in this match
+     * @param isRunning whether the game is running or not
+     */
     public ReincarnationBattle(MadnessCup plugin, List<Team> teams, boolean isRunning) {
         super(plugin, teams, isRunning);
         this.kitsHandling = new KitsHandling(plugin);
@@ -169,97 +183,152 @@ public class ReincarnationBattle extends Game implements Listener{
     }
 
     /**
-     * Removes glass in the only current map.
+     * When a player dies, handle what happens to the victim, the killer and respawn
+     * the player. Check if the game has ended.
+     * @param event The player death event
      */
-    public void glassRemoval() {
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback false");
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill -16 -52 24 -21 -54 20 air replace red_stained_glass");
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill -18 -52 -16 -14 -54 -21 air replace orange_stained_glass");
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 22 -52 -14 27 -54 -18 air replace yellow_stained_glass");
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 24 -52 22 20 -54 27 air replace lime_stained_glass");
-        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback true");
-    }
-
     @EventHandler
     public void onPlayerDeath(PlayerDeathEvent event) {
         Player player = event.getPlayer();
-        UUID uuid = player.getUniqueId();
-        Integer lives = players.get(uuid);
-        PlayerInfo playerInfo = plugin.getPlayerManager().getPlayer(uuid);
-        playerInfo.addDeath();
-        Player killer = player.getKiller();
-        UUID killerUuid = killer.getUniqueId();
-        if (killer != null) {
-            PlayerInfo killerInfo = plugin.getPlayerManager().getPlayer(killerUuid);
-            killerInfo.addKill();
-            killerInfo.addCoins(50);
-            killer.sendMessage(ChatColor.GOLD + "⚔ You get +50 points for killing " + player.getName() + "!");
-            killer.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
-
-        }
-        lives--;
-        players.put(uuid, lives);
-        Bukkit.getLogger().info("[MadnessCup] " + player.getName() + " now has " + lives + " lives.");
+        handleVictimDeath(player);
+        handleKillerReward(player);
         Location location = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
 
         Bukkit.getScheduler().runTask(plugin, () -> {
             player.spigot().respawn();
             player.teleport(location);
             lifeCheck(player);
-            Team lastTeam = getLastTeamStanding();
-            if (lastTeam != null) {
-                awardKillBonus();
-                int reward = 150/lastTeam.getPlayers().size();
-                Bukkit.broadcastMessage(lastTeam.getTeamColor() + "🏆 "
-                                + lastTeam.getTeamName() + " was the last team standing!");
-                Bukkit.broadcastMessage(lastTeam.getTeamColor()
-                        + "Winning team reward: +" + reward + " points per player!");
-                for (UUID teamPlayer : lastTeam.getPlayers()) {
-                    PlayerInfo info = plugin.getPlayerManager().getPlayer(teamPlayer);
-                    info.addCoins(reward);
-                }
-                endGame();
-            }
+            checkForGameEnd();
         });
+    }
+
+    /**
+     * Remove a life from the player who died and add it to its statistics
+     * @param player The player who has died
+     */
+    private void handleVictimDeath(Player player) {
+        UUID uuid = player.getUniqueId();
+        PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+
+        info.addDeath();
+        int lives = players.get(uuid) - 1;
+        players.put(uuid, lives);
+
+        Bukkit.getLogger().info("[MadnessCup] " + player.getName() + " now has " + lives + " lives.");
+    }
+
+    /**
+     * Reward the killer and add points and the kill to its statistics
+     * @param victim The player who got killed
+     */
+    private void handleKillerReward(Player victim) {
+        Player killer = victim.getKiller();
+        if (killer == null) return;
+
+        UUID killerUuid = killer.getUniqueId();
+        PlayerInfo killerInfo = plugin.getPlayerManager().getPlayer(killerUuid);
+
+        killerInfo.addKill();
+        killerInfo.addCoins(50);
+
+        killer.sendMessage(ChatColor.GOLD + "⚔ You get +50 points for killing " + victim.getName() + "!");
+        killer.playSound(victim.getLocation(), Sound.BLOCK_NOTE_BLOCK_BELL, 1.0f, 1.0f);
+    }
+
+    /**
+     * Check if there is only one team standing and if there is give kill bonus,
+     * broadcast the last team standing award and end the game
+     */
+    private void checkForGameEnd() {
+        Team lastTeam = getLastTeamStanding();
+        if (lastTeam == null) return;
+
+        awardKillBonus();
+        int reward = 150 / lastTeam.getPlayers().size();
+        Bukkit.broadcastMessage(lastTeam.getTeamColor() + "🏆 "
+                + lastTeam.getTeamName() + " was the last team standing!");
+        Bukkit.broadcastMessage(lastTeam.getTeamColor()
+                + "Winning team reward: +" + reward + " points per player!");
+
+        for (UUID uuid : lastTeam.getPlayers()) {
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            info.addCoins(reward);
+        }
+        endGame();
     }
 
     /**
      * Give the top killer(s) of the game extra points
      */
     private void awardKillBonus() {
+        List<UUID> topKillers = getTopKillers();
+        if (topKillers.isEmpty()) return;
+
+        int highestKills = plugin.getPlayerManager().getPlayer(topKillers.get(0)).getKills();
+        int reward = 50 / topKillers.size();
+
+        broadcastKillBonus(topKillers, highestKills, reward);
+        giveKillBonus(topKillers, reward);
+    }
+
+    /**
+     * Get a list of the player in the match with the most kills
+     * @return a list of UUIDs representing the top killers
+     */
+    private List<UUID> getTopKillers() {
         int highestKills = -1;
         List<UUID> topKillers = new ArrayList<>();
 
         for (UUID uuid : players.keySet()) {
             PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
             int kills = info.getKills();
+
             if (kills > highestKills) {
                 highestKills = kills;
                 topKillers.clear();
                 topKillers.add(uuid);
-            } else if (kills == highestKills) {
+            }
+            else if (kills == highestKills) {
                 topKillers.add(uuid);
             }
         }
 
-        if (topKillers.isEmpty()) return;
-        int reward = 50 / topKillers.size();
+        return topKillers;
+    }
+
+    /**
+     * Send a broadcast message to the players in the server announcing which
+     * player(s) got the most kills
+     * @param topKillers Player(s) with the most kills in the game
+     * @param highestKills Number of the top killer's kills
+     * @param reward The amount of points each top killer is getting
+     */
+    private void broadcastKillBonus(List<UUID> topKillers, int highestKills, int reward) {
         if (topKillers.size() == 1) {
             UUID uuid = topKillers.get(0);
             Player player = Bukkit.getPlayer(uuid);
             Bukkit.broadcastMessage(ChatColor.RED + "⚔ " + player.getName()
                     + " had the most kills with " + highestKills + " kills!");
             Bukkit.broadcastMessage(ChatColor.GOLD + player.getName()
-                            + " receives +" + reward + " bonus points!");
-        } else {
+                    + " receives +" + reward + " bonus points!");
+        }
+        else {
             Bukkit.broadcastMessage(ChatColor.RED + "⚔ " + "There is a draw for most kills! "
-                            + "Each player receives +" + reward + " points.");
+                    + "Each player receives +" + reward + " points.");
             for (UUID uuid : topKillers) {
                 Player player = Bukkit.getPlayer(uuid);
                 Bukkit.broadcastMessage(ChatColor.GOLD + player.getName()
-                                + " receives +" + reward + " bonus points!");
+                        + " receives +" + reward + " bonus points!");
             }
         }
+    }
+
+    /**
+     * Gives kill bonus points to the top killer(s)
+     * @param topKillers Player(s) with the most kills in the game
+     * @param reward The amount of points each top killer is getting
+     */
+    private void giveKillBonus(List<UUID> topKillers, int reward) {
         for (UUID uuid : topKillers) {
             PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
             info.addCoins(reward);
@@ -271,17 +340,14 @@ public class ReincarnationBattle extends Game implements Listener{
      * @param player player being checked
      */
      private void lifeCheck(Player player) {
-        if (players.get(player.getUniqueId()) == 1) {
-            kitsHandling.startKitSelection(player);
-        }
-        if (players.get(player.getUniqueId()) == 0) {
-            player.setGameMode(GameMode.SPECTATOR);
-        }
+        if (players.get(player.getUniqueId()) == 1) kitsHandling.startKitSelection(player);
+        if (players.get(player.getUniqueId()) == 0) player.setGameMode(GameMode.SPECTATOR);
     }
 
     /**
      * Gets the only team remaining in the game.
-     * Returns null if multiple teams are still alive.
+     * @return null if multiple teams are still alive or the last team standing if there
+     * is only one left
      */
     private Team getLastTeamStanding() {
         Team survivingTeam = null;
@@ -331,5 +397,17 @@ public class ReincarnationBattle extends Game implements Listener{
                 players.containsKey(player.getUniqueId())) {
             if (event.getFoodLevel() < player.getFoodLevel()) event.setCancelled(true);
         }
+    }
+
+    /**
+     * Removes glass in the only current map.
+     */
+    public void glassRemoval() {
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback false");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill -16 -52 24 -21 -54 20 air replace red_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill -18 -52 -16 -14 -54 -21 air replace orange_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 22 -52 -14 27 -54 -18 air replace yellow_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 24 -52 22 20 -54 27 air replace lime_stained_glass");
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback true");
     }
 }
