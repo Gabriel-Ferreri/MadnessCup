@@ -10,6 +10,7 @@ import Coocos.madnessCup.systems.managers.QueueManager;
 import Coocos.madnessCup.utils.Countdown;
 import Coocos.madnessCup.utils.MenuHandler;
 import org.bukkit.*;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -18,6 +19,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
@@ -130,6 +133,8 @@ public class ReincarnationBattle extends Game implements Listener{
         for (Team team : this.teams) {
             int currentPoints = 0;
             for (UUID uuid : team.getPlayers()) {
+                Player player = Bukkit.getPlayer(uuid);
+                if (player != null) player.setNoDamageTicks(180);
                 PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
                 currentPoints += info.getCoins();
             }
@@ -174,15 +179,35 @@ public class ReincarnationBattle extends Game implements Listener{
             for (Map.Entry<Team, Integer> entry : sortedTeams) {
                 Team team = entry.getKey();
                 int points = entry.getValue();
-                if (position == 1) Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: "
-                        + team.getTeamName() + " - " + points + " points!");
+                if (position == 1) {
+                    Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: " + team.getTeamName() + " - " + points + " points!");
+                    for (UUID uuid : team.getPlayers()) {
+                        Player player = Bukkit.getPlayer(uuid);
+
+                        if (player != null) {
+                            BukkitTask fireworkTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+                                if (!player.isOnline()) return;
+
+                                Firework firework = player.getWorld().spawn(
+                                        player.getLocation().add(0, 1, 0), Firework.class);
+
+                                FireworkMeta meta = firework.getFireworkMeta();
+                                meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE)
+                                        .withColor(Color.YELLOW).withColor(Color.WHITE)
+                                        .flicker(true).trail(true).build());
+                                meta.setPower(0);
+                                firework.setFireworkMeta(meta);
+                            }, 150L, 10L);
+                            Bukkit.getScheduler().runTaskLater(plugin, fireworkTask::cancel, 190L);
+                        }
+                    }
+                }
                 else Bukkit.broadcastMessage(team.getTeamColor() + " " + position + ". " + team.getTeamName() + " - " + points + " points");
                 position++;
             }
             Bukkit.broadcastMessage(ChatColor.WHITE + " ");
             for (Player player : Bukkit.getOnlinePlayers())
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1.0f, 1.0f);
-
         }, 60L);
 
     }
