@@ -2,7 +2,6 @@ package Coocos.madnessCup.listeners;
 
 import Coocos.madnessCup.MadnessCup;
 import Coocos.madnessCup.systems.managers.PlayerManager;
-import Coocos.madnessCup.utils.DirectoryManager;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

@@ -3,6 +3,7 @@ package Coocos.madnessCup.systems.managers;
 import Coocos.madnessCup.systems.Team;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 
@@ -65,21 +66,20 @@ public class TeamManager {
         p.sendMessage(ChatColor.GREEN + "You joined " + teamName + "!");
     }
 
-    public boolean removePlayerFromTeam(UUID player, String teamName) {
+    public void removePlayerFromTeam(UUID player, String teamName) {
         Team team = teams.get(teamName);
         Player p = Bukkit.getPlayer(player);
-        if (team == null || p == null) return false;
-
-        // Remove from your plugin’s logical list
-        team.removePlayer(player);
+        if (team == null) return;
+        team.removePlayer(player); // Remove from your plugin’s logical list
 
         // Remove from the Minecraft scoreboard team
         org.bukkit.scoreboard.Team mcTeam = Bukkit.getScoreboardManager()
-                .getMainScoreboard().getTeam(teamName);
-        if (mcTeam != null) mcTeam.removeEntry(p.getName());
-
-        p.sendMessage(ChatColor.YELLOW + "You left " + teamName + "!");
-        return true;
+                    .getMainScoreboard().getTeam(teamName);
+        if (mcTeam != null) {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(player);
+            mcTeam.removeEntry(offlinePlayer.getName());
+        }
+        if (p != null) p.sendMessage(ChatColor.YELLOW + "You left " + teamName + "!");
     }
 
 }

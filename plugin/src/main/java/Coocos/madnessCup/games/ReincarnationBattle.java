@@ -17,6 +17,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+
 import java.util.*;
 
 /**
@@ -95,18 +97,17 @@ public class ReincarnationBattle extends Game implements Listener{
             for (UUID uuid : players.keySet()) {
                 PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
                 Player player = Bukkit.getPlayer(uuid);
-                player.removeScoreboardTag("ingame");
-                player.setHealth(20);
-                player.setGameMode(GameMode.ADVENTURE);
-                Bukkit.getLogger().info("[MadnessCup] Player " + player.getName() + " has " + info.getCoins() + " coins!");
-                info.reset();
-                if (info != null && info.getTeam() != null)
-                    plugin.getTeamManager().removePlayerFromTeam(
-                            uuid, info.getTeam().getTeamName());
-                Bukkit.getScheduler().runTask(plugin, () -> {
+                if (player != null) {
+                    player.removeScoreboardTag("ingame");
+                    player.setHealth(20);
+                    player.setFoodLevel(20);
+                    player.setGameMode(GameMode.ADVENTURE);
                     player.teleport(spawn);
                     menuHandler.defaultInventory(player);
-                });
+                }
+                if (info.getTeam() != null)
+                    plugin.getTeamManager().removePlayerFromTeam(uuid, info.getTeam().getTeamName());
+                info.reset();
             }
             players.clear();;
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -160,7 +161,11 @@ public class ReincarnationBattle extends Game implements Listener{
                 UUID uuid = entry.getKey();
                 int points = entry.getValue();
                 Player player = Bukkit.getPlayer(uuid);
-                Bukkit.broadcastMessage(ChatColor.WHITE + " " + position + ". " + player.getName() + " - " + points + " points");
+                if (player == null) {
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                    Bukkit.broadcastMessage(ChatColor.WHITE + " " + position + ". " + offlinePlayer.getName() + " - " + points + " points");
+                }
+                else Bukkit.broadcastMessage(ChatColor.WHITE + " " + position + ". " + player.getName() + " - " + points + " points");
                 position++;
             }
             Bukkit.broadcastMessage("");
@@ -409,5 +414,15 @@ public class ReincarnationBattle extends Game implements Listener{
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 22 -52 -14 27 -54 -18 air replace yellow_stained_glass");
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run fill 24 -52 22 20 -54 27 air replace lime_stained_glass");
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "execute in minecraft:reincarnation1 run gamerule send_command_feedback true");
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (!player.getScoreboardTags().contains("ingame")) return;
+        UUID uuid = player.getUniqueId();
+        players.put(uuid, 0);
+        player.removeScoreboardTag("ingame");
+        checkForGameEnd();
     }
 }

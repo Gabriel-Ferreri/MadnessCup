@@ -48,12 +48,20 @@ public class KitsHandling implements Listener {
         for (Kit kit : Kit.values()) kitCounts.put(kit, 0);
     }
 
+    /**
+     * Calculate the amount of times a kit can be picked before it gets blocked
+     * @param playerCount Number of players in the game
+     */
     public void initialize(int playerCount) {
         this.maxPerKit = (int) Math.ceil(
                 (double) playerCount / Kit.values().length
         );
     }
 
+    /**
+     * Give a player the basic first life inventory
+     * @param player The player who is getting the basic inventory
+     */
     public void givePlayersInventory(Player player) {
         PlayerInfo info = plugin.getPlayerManager().getPlayer(player.getUniqueId());
         Inventory inv = player.getInventory();
@@ -87,6 +95,7 @@ public class KitsHandling implements Listener {
             if (chosenKit == null) {
                 for (Kit kit : Kit.values()) {
                     if (kitCounts.get(kit) < maxPerKit) {
+                        kitCounts.put(kit, kitCounts.get(kit) + 1);
                         chosenKit = kit;
                         break;
                     }
@@ -97,7 +106,6 @@ public class KitsHandling implements Listener {
                 player.setGameMode(GameMode.ADVENTURE);
                 return;
             }
-            kitCounts.put(chosenKit, kitCounts.get(chosenKit) + 1);
             switch (chosenKit) {
                 case SWORDSMAN -> swordsmanKit(player);
                 case TANK -> tankKit(player);
@@ -107,7 +115,7 @@ public class KitsHandling implements Listener {
 
             playerChoices.remove(uuid);
             player.setGameMode(GameMode.ADVENTURE);
-            player.sendMessage(ChatColor.GOLD + "You are now immune for 5 seconds");
+            player.sendMessage(ChatColor.LIGHT_PURPLE + "You are now immune for 5 seconds");
             player.setNoDamageTicks(100);
             PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
             Location newLocation = null;
@@ -139,6 +147,44 @@ public class KitsHandling implements Listener {
         player.openInventory(inv);
     }
 
+    private void selectKit(Player player, Kit kit) {
+        if (kitCounts.get(kit) >= maxPerKit) {
+            player.sendMessage(ChatColor.RED + "This kit has already been taken!");
+            return;
+        }
+        UUID uuid = player.getUniqueId();
+        playerChoices.put(uuid, kit);
+        kitCounts.put(kit, kitCounts.get(kit) + 1);
+
+        player.closeInventory();
+        player.sendMessage(ChatColor.LIGHT_PURPLE + "You selected the " + kit + " Kit!");
+        updateAllKitMenus();
+    }
+
+    private void updateAllKitMenus() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (!player.getOpenInventory().getTitle().equals("Choose your kit")) continue;
+            Inventory inv = player.getOpenInventory().getTopInventory();
+
+            if (kitCounts.get(Kit.SWORDSMAN) >= maxPerKit) inv.setItem(2, createKitItem(Material.BARRIER, "Swordsman - Taken"));
+            else inv.setItem(2, createKitItem(Material.IRON_SWORD, "Swordsman"));
+
+            if (kitCounts.get(Kit.TANK) >= maxPerKit) inv.setItem(3, createKitItem(Material.BARRIER, "Tank - Taken"));
+            else inv.setItem(3, createKitItem(Material.SHIELD, "Tank"));
+
+            if (kitCounts.get(Kit.LUMBERJACK) >= maxPerKit) inv.setItem(5, createKitItem(Material.BARRIER, "Lumberjack - Taken"));
+            else inv.setItem(5, createKitItem(Material.IRON_AXE, "Lumberjack"));
+
+            if (kitCounts.get(Kit.UTILITY) >= maxPerKit) inv.setItem(6, createKitItem(Material.BARRIER, "Utility - Taken"));
+            else inv.setItem(6, createKitItem(Material.TOTEM_OF_UNDYING, "Utility"));
+        }
+    }
+    /**
+     * Create an item with a custom material and name
+     * @param material Item material
+     * @param name Item name
+     * @return the item
+     */
     private ItemStack createKitItem(Material material, String name) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
@@ -148,6 +194,13 @@ public class KitsHandling implements Listener {
         return item;
     }
 
+    /**
+     * Create an armor item with a custom material color and protection level
+     * @param material Armor material
+     * @param color Armor color
+     * @param level Armor protection level
+     * @return armor item
+     */
     private ItemStack customizeArmor(Material material, Color color, Integer level) {
         ItemStack item = new ItemStack(material);
         LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
@@ -163,35 +216,25 @@ public class KitsHandling implements Listener {
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
+
         if (!plugin.isInGame(player)) return;
         if (!event.getView().getTitle().equals("Choose your kit")) return;
-        event.setCancelled(true);
 
+        event.setCancelled(true);
         switch (event.getSlot()) {
-            case 2 -> {
-                if (kitCounts.get(Kit.SWORDSMAN) >= maxPerKit) return;
-                playerChoices.put(player.getUniqueId(), Kit.SWORDSMAN);
-                swordsmanKit(player);
-            }
-            case 3 -> {
-                if (kitCounts.get(Kit.TANK) >= maxPerKit) return;
-                playerChoices.put(player.getUniqueId(), Kit.TANK);
-                tankKit(player);
-            }
-            case 5 -> {
-                if (kitCounts.get(Kit.LUMBERJACK) >= maxPerKit) return;
-                playerChoices.put(player.getUniqueId(), Kit.LUMBERJACK);
-                lumbermanKit(player);
-            }
-            case 6 -> {
-                if (kitCounts.get(Kit.UTILITY) >= maxPerKit) return;
-                playerChoices.put(player.getUniqueId(), Kit.UTILITY);
-                utilityKit(player);
-            }
+            case 2 -> selectKit(player, Kit.SWORDSMAN);
+            case 3 -> selectKit(player, Kit.TANK);
+            case 5 -> selectKit(player, Kit.LUMBERJACK);
+            case 6 -> selectKit(player, Kit.UTILITY);
         }
-        Bukkit.getLogger().info(ChatColor.RED + "playerChoices = " + playerChoices);
+
+        Bukkit.getLogger().info(ChatColor.RED + "playerChoices = " + playerChoices);;
     }
 
+    /**
+     * Event handler to prevent players from closing the kit selection inventory
+     * @param event inventory closing event
+     */
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         Player player = (Player) event.getPlayer();
@@ -200,10 +243,15 @@ public class KitsHandling implements Listener {
         if (!event.getView().getTitle().equals("Choose your kit")) return;
 
         Bukkit.getScheduler().runTask(plugin, () -> {
-            if (player.getGameMode() == GameMode.SPECTATOR) openChoice(player);
+            UUID uuid = player.getUniqueId();
+            if (playerChoices.get(uuid) == null) openChoice(player);
         });
     }
 
+    /**
+     * Event handler to prevent players from dragging items in their inventory
+     * @param event inventory drag event
+     */
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
         Player player = (Player) event.getWhoClicked();
@@ -213,6 +261,10 @@ public class KitsHandling implements Listener {
         event.setCancelled(true);
     }
 
+    /**
+     * Event handler to prevent players from dropping inventory items
+     * @param event drop event
+     */
     @EventHandler
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         Player player = event.getPlayer();
@@ -221,6 +273,10 @@ public class KitsHandling implements Listener {
         event.setCancelled(true);
     }
 
+    /**
+     * Utility kit creator
+     * @param player Player getting the utility kit
+     */
     public void utilityKit(Player player) {
         givePlayersInventory(player);
         Inventory inv = player.getInventory();
@@ -237,6 +293,10 @@ public class KitsHandling implements Listener {
         inv.setItem(3, potion);
     }
 
+    /**
+     * Swordsman kit creator
+     * @param player Player getting the swordsman kit
+     */
     public void swordsmanKit(Player player) {
         givePlayersInventory(player);
         Inventory inv = player.getInventory();
@@ -245,6 +305,10 @@ public class KitsHandling implements Listener {
         inv.setItem(0, sword);
     }
 
+    /**
+     * Tank kit creator
+     * @param player Player getting the tank kit
+     */
     public void tankKit(Player player) {
         givePlayersInventory(player);
         Inventory inv = player.getInventory();
@@ -259,6 +323,10 @@ public class KitsHandling implements Listener {
         player.getInventory().setHelmet(customizeArmor(Material.LEATHER_HELMET, teamColor,4));
     }
 
+    /**
+     * Lumberjack kit creator
+     * @param player Player getting the lumberjack kit
+     */
     public void lumbermanKit(Player player) {
         givePlayersInventory(player);
         Inventory inv = player.getInventory();

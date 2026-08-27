@@ -32,5 +32,5 @@ public class PlayerInfo {
     public void addKill() { this.kills++; }
     public void addDeath() { this.deaths++; }
 
-    public void reset() { coins = 0; kills = 0; deaths = 0; }
+    public void reset() { this.coins = 0; this.kills = 0; this.deaths = 0; }
 }
