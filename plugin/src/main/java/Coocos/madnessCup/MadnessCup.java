@@ -44,10 +44,10 @@ public final class MadnessCup extends JavaPlugin {
         console.sendMessage(ChatColor.GREEN + "MadnessCup Plugin Enabled");
         DirectoryManager.deleteDimension("reincarnation1");
         ItemFactory.init(this);
-        queueManager = new QueueManager();
+        queueManager = new QueueManager(this);
 
         Game reincarnation = new ReincarnationBattle(this, new ArrayList<>(), false);
-        Queue reincarnationQueue = new Queue(this, "reincarnation1", reincarnation, new ArrayList<>(), 2, 12, 0);
+        Queue reincarnationQueue = new Queue(this, "reincarnation1", reincarnation, new ArrayList<>(), 2, 16, 0);
         queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
 
         // Delay team setup until the server is fully ready

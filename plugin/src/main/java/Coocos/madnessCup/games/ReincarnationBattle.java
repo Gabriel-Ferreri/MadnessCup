@@ -115,10 +115,9 @@ public class ReincarnationBattle extends Game implements Listener{
             players.clear();;
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 QueueManager queueManager = plugin.getQueueManager();
-                queueManager.removeQueue("reincarnation1");
                 Bukkit.getLogger().info("[MadnessCup] Creating fresh reincarnation1 world");
                 Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
-                Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 12, 0);
+                Queue reincarnationQueue = new Queue(plugin, "reincarnation1", reincarnation, new ArrayList<>(), 2, 16, 0);
                 queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
             },20L);
         }, 160L);

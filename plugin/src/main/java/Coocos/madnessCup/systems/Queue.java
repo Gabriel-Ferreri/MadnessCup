@@ -88,6 +88,8 @@ public class Queue {
                 currentCapacity = 0;
                 for (Team team : teams) game.addTeam(team);
                 game.startGame();
+                QueueManager queueManager = plugin.getQueueManager();
+                queueManager.removeQueue("reincarnation1");
             }
         };
         countdown.start();
