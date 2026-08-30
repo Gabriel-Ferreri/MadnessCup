@@ -8,6 +8,10 @@ import java.nio.file.*;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+/**
+ * Class which takes care of directories with the minecraft dimensions inside, currently
+ * set to work only on reincarnation game
+ */
 public class DirectoryManager {
 
     private static final Path DIMENSIONS_PATH = Paths.get("world", "dimensions", "minecraft");

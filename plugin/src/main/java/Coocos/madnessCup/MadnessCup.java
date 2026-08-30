@@ -110,6 +110,10 @@ public final class MadnessCup extends JavaPlugin {
 
     public boolean bypassLobbyRestrictions(Player player) {return isAdmin(player) || isInGame(player);}
 
+    /**
+     * Disable annoying game default rules when a world is created
+     * @param world World in which the rules are disabled
+     */
     public void disableVanillaFeatures(World world) {
         world.setGameRule(GameRules.ADVANCE_TIME, false);
         world.setGameRule(GameRules.SPAWN_MOBS, false);

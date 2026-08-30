@@ -117,12 +117,20 @@ public class MenuHandler implements Listener {
         }
     }
 
+    /**
+     * Default inventory when a player joins a game
+     * @param player Player getting the inventory
+     */
     public void defaultInventory(Player player) {
         Inventory inv = player.getInventory();
         inv.clear();
         inv.setItem(8, ItemFactory.createPaper("Play","Check out what games are available", "play"));
     }
 
+    /**
+     * Give a player a list of queues they can enter
+     * @param player Player getting the inventory
+     */
     public void openQueueInventory(Player player) {
         ArrayList<Queue> queues = new ArrayList<>(plugin.getQueueManager().getAllQueues());
         Inventory inv = Bukkit.createInventory(null, 27,"Reincarnation Battle Queues");
@@ -137,12 +145,22 @@ public class MenuHandler implements Listener {
         player.openInventory(inv);
     }
 
+    /**
+     * Give a player the inventory with a leave queue button if they enter a queue
+     * @param player Player getting this inventory
+     */
     public void queueStartInventory(Player player) {
         Inventory inv = player.getInventory();
         inv.clear();
         inv.setItem(4, ItemFactory.createPaper("Leave Queue","Press to leave the queue", "leave"));
     }
 
+    /**
+     * Function to add a player to a queue if possible
+     * @param queue Queue the players has to be added to
+     * @param player The player being added to the queue
+     * @return Whether is possible or not
+     */
     public boolean joinQueue(Queue queue, Player player) {
         if (queue == null) {
             player.sendMessage(ChatColor.RED + "That queue doesn't exist.");

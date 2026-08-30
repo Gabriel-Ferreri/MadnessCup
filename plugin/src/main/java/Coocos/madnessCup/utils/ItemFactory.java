@@ -20,6 +20,13 @@ public class ItemFactory {
         KEY_MENU = new NamespacedKey(plugin, "menu_item");
     }
 
+    /**
+     * Create a paper with a given name, lore and key and return it
+     * @param displayName Paper name
+     * @param lore Paper description
+     * @param key Paper key
+     * @return Paper created
+     */
     public static ItemStack createPaper(String displayName, String lore, String key) {
         ItemStack paper = new ItemStack(Material.PAPER);
         ItemMeta meta = paper.getItemMeta();

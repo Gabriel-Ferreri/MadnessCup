@@ -27,6 +27,10 @@ public abstract class Game {
     public abstract void startGame();
     public abstract void endGame();
 
+    /**
+     * When a game ends, delete the world that was use and create a new one
+     * @param worldName Name of the world to recreate
+     */
     public void recreateWorld(String worldName) {
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             String lowerWorld = worldName.toLowerCase();

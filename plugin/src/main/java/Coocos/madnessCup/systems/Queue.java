@@ -104,6 +104,11 @@ public class Queue {
         }
     }
 
+    /**
+     * Sort players inside some teams randomly
+     * @param players Players to be sorted
+     * @param teams Teams where the players will end up
+     */
     public void teamSort(List<UUID> players, List<Team> teams) {
         for (UUID uuid : players) {
             teams.sort(Comparator.comparingInt(team -> team.getPlayers().size()));

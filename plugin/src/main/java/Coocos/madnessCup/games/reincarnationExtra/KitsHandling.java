@@ -129,6 +129,10 @@ public class KitsHandling implements Listener {
         }, 160L);
     }
 
+    /**
+     * Open the choice menu of available kits
+     * @param player The player who has to select a kit
+     */
     public void openChoice(Player player) {
         Inventory inv = Bukkit.createInventory(null, 9,
                 Component.text("Choose your kit"));
@@ -147,6 +151,11 @@ public class KitsHandling implements Listener {
         player.openInventory(inv);
     }
 
+    /**
+     * Store which kit was selected by a player
+     * @param player The player selecting a kit
+     * @param kit Kit selected by the player
+     */
     private void selectKit(Player player, Kit kit) {
         if (kitCounts.get(kit) >= maxPerKit) {
             player.sendMessage(ChatColor.RED + "This kit has already been taken!");
@@ -161,6 +170,9 @@ public class KitsHandling implements Listener {
         updateAllKitMenus();
     }
 
+    /**
+     * Update the menu view of players with the menu already open
+     */
     private void updateAllKitMenus() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!player.getOpenInventory().getTitle().equals("Choose your kit")) continue;
@@ -213,6 +225,11 @@ public class KitsHandling implements Listener {
         return item;
     }
 
+    /**
+     * When a player clicks in their inventory check if they select a slot which
+     * contains a kit
+     * @param event The inventory click event
+     */
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();

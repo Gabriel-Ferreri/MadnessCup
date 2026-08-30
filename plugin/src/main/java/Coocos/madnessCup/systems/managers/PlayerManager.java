@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Player manager class to keep track of players online
+ */
 public class PlayerManager {
     private final Map<UUID, PlayerInfo> players = new HashMap<>();
 

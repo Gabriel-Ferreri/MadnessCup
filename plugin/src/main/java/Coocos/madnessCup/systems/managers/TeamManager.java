@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * Team manager class to keep track of the teams created for the games
+ */
 public class TeamManager {
     private final Map<String, Team> teams = new HashMap<>();
     private final Scoreboard scoreboard;
