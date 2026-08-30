@@ -1,6 +1,7 @@
 package Coocos.madnessCup.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -28,7 +29,7 @@ public class DirectoryManager {
         }
     }
 
-    // Copying the dimension to delete name
+    // Copying the dimension to delete
     public static void deleteDimension(String dimensionName) {
 
         Path dimension = DIMENSIONS_PATH.resolve(dimensionName);
@@ -36,6 +37,10 @@ public class DirectoryManager {
         if (!Files.exists(dimension)) return;
 
         try {
+            String worldName = dimensionName.toLowerCase();
+            World world = Bukkit.getWorld(worldName);
+            if (world != null) Bukkit.unloadWorld(world, false);
+
             deleteDirectory(dimension);
         }
         catch (RuntimeException e) {

@@ -90,6 +90,7 @@ public class Queue {
                 game.startGame();
                 QueueManager queueManager = plugin.getQueueManager();
                 queueManager.removeQueue("reincarnation1");
+
             }
         };
         countdown.start();

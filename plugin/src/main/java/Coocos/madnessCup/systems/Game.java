@@ -1,7 +1,12 @@
 package Coocos.madnessCup.systems;
 
 import Coocos.madnessCup.MadnessCup;
+import Coocos.madnessCup.games.ReincarnationBattle;
+import Coocos.madnessCup.systems.managers.QueueManager;
+import Coocos.madnessCup.utils.DirectoryManager;
+import org.bukkit.Bukkit;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,6 +26,18 @@ public abstract class Game {
 
     public abstract void startGame();
     public abstract void endGame();
+
+    public void recreateWorld(String worldName) {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            String lowerWorld = worldName.toLowerCase();
+            QueueManager queueManager = plugin.getQueueManager();
+            DirectoryManager.deleteDimension(lowerWorld);
+            Bukkit.getLogger().info("[MadnessCup] Creating fresh " + lowerWorld + " world");
+            Game reincarnation = new ReincarnationBattle(plugin, new ArrayList<>(), false);
+            Queue reincarnationQueue = new Queue(plugin, lowerWorld, reincarnation, new ArrayList<>(), 2, 16, 0);
+            queueManager.registerQueue(reincarnationQueue.getQueueName(), reincarnationQueue);
+        },20L);
+    }
 
     public MadnessCup getPlugin() { return this.plugin; }
     public List<Team> getTeams() { return this.teams; }

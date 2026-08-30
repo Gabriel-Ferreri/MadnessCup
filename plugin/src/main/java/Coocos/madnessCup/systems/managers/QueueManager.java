@@ -43,9 +43,6 @@ public class QueueManager {
         // Maps remove also returns the value it removed
         Queue queue = queues.remove(worldName);
         if (queue == null) return;
-        org.bukkit.World world = Bukkit.getWorld(worldName);
-        if (world != null) Bukkit.unloadWorld(world, false);
-        DirectoryManager.deleteDimension(worldName); //Comment this line to modify world
 
         // Of course this has to change when there's going to be different types of queues
         MenuHandler menuHandler = new MenuHandler(plugin);
