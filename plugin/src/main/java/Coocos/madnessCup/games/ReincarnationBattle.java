@@ -176,7 +176,8 @@ public class ReincarnationBattle extends Game implements Listener{
                     Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: " + team.getTeamName() + " - " + points + " points!");
                     for (UUID uuid : team.getPlayers()) {
                         Player player = Bukkit.getPlayer(uuid);
-
+                        PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+                        info.addWin();
                         if (player != null) {
                             BukkitTask fireworkTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
                                 if (!player.isOnline()) return;

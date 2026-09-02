@@ -11,7 +11,7 @@ public class TeamDTO {
     private String teamName;
     private List<UUID> players;
     private String teamColor;
-    private String customizeColor;
+    private Integer customizeColor;
     private Integer teamCoins;
     private Integer teamLimit;
 }

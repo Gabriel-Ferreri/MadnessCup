@@ -17,12 +17,20 @@ public class TeamController {
     }
 
     @PostMapping
-    public void addTeams(@RequestBody List<String> teamNames) {
-        teamService.saveTeams(teamNames);
+    public void addTeam(@RequestBody TeamDTO team) {
+        teamService.saveTeam(team);
     }
 
     @GetMapping
-    public Collection<String> getTeams() {
+    public Collection<TeamDTO> getTeams() {
         return teamService.getAllTeams();
+    }
+
+    @PutMapping("/{teamName}")
+    public void updateTeam(
+            @PathVariable String teamName,
+            @RequestBody TeamDTO teamDTO) {
+
+            teamService.updateTeam(teamName, teamDTO);
     }
 }

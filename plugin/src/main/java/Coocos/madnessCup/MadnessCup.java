@@ -68,7 +68,6 @@ public final class MadnessCup extends JavaPlugin {
 
 
             testBackend();
-            testTeamBackend();
         });
 
         for (World world : Bukkit.getWorlds()) console.sendMessage(("Loaded world: " + world.getName()));
@@ -138,38 +137,6 @@ public final class MadnessCup extends JavaPlugin {
 
             System.out.println(response.body());
 
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void testTeamBackend() {
-
-        try {
-
-            List<String> teamNames = this.getTeamManager()
-                    .getAllTeams()
-                    .stream()
-                    .map(Team::getTeamName)
-                    .collect(Collectors.toList());
-
-            Gson gson = new Gson();
-            String json = gson.toJson(teamNames);
-
-            HttpClient client = HttpClient.newHttpClient();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/teams"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
-
-            HttpResponse<String> response =
-                    client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println("Status: " + response.statusCode());
-            System.out.println("Response: " + response.body());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

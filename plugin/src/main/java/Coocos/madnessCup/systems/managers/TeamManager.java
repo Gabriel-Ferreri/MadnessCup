@@ -1,16 +1,20 @@
 package Coocos.madnessCup.systems.managers;
 
 import Coocos.madnessCup.systems.Team;
+import com.google.gson.Gson;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Team manager class to keep track of the teams created for the games
@@ -41,6 +45,7 @@ public class TeamManager {
         mcTeam.setColor(color);
         mcTeam.setPrefix(color + "[" + team.getTeamName() + "] ");
         mcTeam.setAllowFriendlyFire(false);
+        sendTeamToBackend(team);
     }
 
     public void addPlayerToTeam(UUID player, String teamName) {
@@ -67,6 +72,7 @@ public class TeamManager {
         if (mcTeam != null) mcTeam.addEntry(p.getName());
 
         p.sendMessage(ChatColor.GREEN + "You joined " + teamName + "!");
+        putTeamToBackend(team);
     }
 
     public void removePlayerFromTeam(UUID player, String teamName) {
@@ -83,6 +89,75 @@ public class TeamManager {
             mcTeam.removeEntry(offlinePlayer.getName());
         }
         if (p != null) p.sendMessage(ChatColor.YELLOW + "You left " + teamName + "!");
+        putTeamToBackend(team);
+    }
+
+    public void sendTeamToBackend(Team team) {
+
+        try {
+            Map<String, Object> teamData = new HashMap<>();
+
+            teamData.put("teamName", team.getTeamName());
+            teamData.put("players", team.getPlayers());
+            teamData.put("teamColor", team.getTeamColor().name());
+            teamData.put("customizeColor", team.getCustomizeColor().asRGB());
+            teamData.put("teamCoins",team.getTeamCoins());
+            teamData.put("teamLimit", team.getTeamLimit());
+
+            Gson gson = new Gson();
+            String json = gson.toJson(teamData);
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/teams"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Status: " + response.statusCode());
+            System.out.println("Response: " + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void putTeamToBackend(Team team) {
+
+        try {
+            Map<String, Object> teamData = new HashMap<>();
+
+            teamData.put("teamName", team.getTeamName());
+            teamData.put("players", team.getPlayers());
+            teamData.put("teamColor", team.getTeamColor().name());
+            teamData.put("customizeColor", team.getCustomizeColor().asRGB());
+            teamData.put("teamCoins",team.getTeamCoins());
+            teamData.put("teamLimit", team.getTeamLimit());
+
+            Gson gson = new Gson();
+            String json = gson.toJson(teamData);
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/teams/" + team.getTeamName()))
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println("Status: " + response.statusCode());
+            System.out.println("Response: " + response.body());
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }

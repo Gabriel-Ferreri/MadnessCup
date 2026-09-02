@@ -18,6 +18,7 @@ public class PlayerInfo {
     private int coins;
     private int kills;
     private int deaths;
+    private int wins;
 
     public PlayerInfo(UUID uuid) {
         this.uuid = uuid;
@@ -25,6 +26,7 @@ public class PlayerInfo {
         this.coins = 0;
         this.kills = 0;
         this.deaths = 0;
+        this.wins = 0;
     }
 
     public UUID getUuid() { return uuid; }
@@ -32,15 +34,18 @@ public class PlayerInfo {
     public int getCoins() { return coins; }
     public int getKills() { return kills; }
     public int getDeaths() { return deaths; }
+    public int getWins() { return wins; }
 
     public void setTeam(Team team) { this.team = team; updatePlayerBackend(this);}
     public void setCoins(int coins) { this.coins = coins; updatePlayerBackend(this);}
     public void setKills(int kills) { this.kills = kills; updatePlayerBackend(this);}
     public void setDeaths(int deaths) { this.deaths = deaths; updatePlayerBackend(this);}
+    public void setWins(int wins) { this.wins = wins; updatePlayerBackend(this);}
 
     public void addCoins(int amount) { this.coins += amount; updatePlayerBackend(this);}
     public void addKill() { this.kills++; updatePlayerBackend(this);}
     public void addDeath() { this.deaths++; updatePlayerBackend(this);}
+    public void addWin() { this.wins++; updatePlayerBackend(this);}
 
     public void reset() { setCoins(0); setKills(0); setDeaths(0); }
 
@@ -55,7 +60,7 @@ public class PlayerInfo {
             playerData.put("coins", info.getCoins());
             playerData.put("kills", info.getKills());
             playerData.put("deaths", info.getDeaths());
-            playerData.put("wins", 0);
+            playerData.put("wins", info.getWins());
 
             if (info.getTeam() != null) {
                 playerData.put("team", info.getTeam().getTeamName());

@@ -73,10 +73,7 @@ public class PlayerManager {
 
 
             HttpResponse<String> response =
-                    client.send(
-                            request,
-                            HttpResponse.BodyHandlers.ofString()
-                    );
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
 
             System.out.println("Status: " + response.statusCode());
             System.out.println("Response: " + response.body());
