@@ -49,38 +49,47 @@ public class ReincarnationBattle extends Game implements Listener{
     @Override
     public void startGame() {
         if (isRunning) {
-            Bukkit.getLogger().warning("[MadnessCup] Tried to start an already running game!");
+            Bukkit.getLogger().warning(
+                    "[MadnessCup] Tried to start an already running game!");
             return;
         }
-        this.isRunning = true;
+        isRunning = true;
         Bukkit.getPluginManager().registerEvents(this, plugin);
         Bukkit.getPluginManager().registerEvents(kitsHandling, plugin);
-        Location redLocation = new Location(Bukkit.getWorld("reincarnation1"), -18.5, -54, 22.5, 0, 0);
-        Location orangeLocation = new Location(Bukkit.getWorld("reincarnation1"), -15.5, -54, -17.5, 0, 0);
-        Location yellowLocation = new Location(Bukkit.getWorld("reincarnation1"), 24.5, -54, -15.5, 0, 0);
-        Location limeLocation = new Location(Bukkit.getWorld("reincarnation1"), 22.5, -54, 24.5, 0, 0);
-        for (Team team : this.teams) {
-            for (UUID uuid : team.getPlayers()) {
-                Player player = Bukkit.getPlayer(uuid);
-                if (player == null) continue;
-                players.put(uuid,2);
-                player.addScoreboardTag("ingame");
-                switch (team.getTeamName()) {
-                    case "Red Nerds" -> player.teleport(redLocation);
-                    case "Orange Nerds" -> player.teleport(orangeLocation);
-                    case "Yellow Nerds" -> player.teleport(yellowLocation);
-                    case "Lime Nerds" -> player.teleport(limeLocation);
-                }
-                kitsHandling.givePlayersInventory(player);
-            }
+        for (Team team : teams) {
+            Location spawn = getTeamSpawn(team);
+            for (UUID uuid : team.getPlayers()) setupPlayer(uuid, spawn);
         }
         kitsHandling.initialize(players.size());
-        Countdown countdown = new Countdown(plugin, new ArrayList<>(players.keySet()), 5) {
+        startCountdown();
+    }
+
+    /**
+     * Set up a single player to be ready for the game
+     * @param uuid Player id
+     * @param spawn Spawn location of the player
+     */
+    private void setupPlayer(UUID uuid, Location spawn) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player == null) return;
+        players.put(uuid, 2);
+        player.addScoreboardTag("ingame");
+        player.teleport(spawn);
+        kitsHandling.givePlayersInventory(player);
+    }
+
+    /**
+     * Start the countdown before the player cages open and handle what happens
+     * at the end
+     */
+    private void startCountdown() {
+        Countdown countdown = new Countdown(plugin, new ArrayList<>(
+                players.keySet()), 5) {
             @Override
             public void onFinish() {
                 for (UUID uuid : players.keySet()) {
-                    Player p = Bukkit.getPlayer(uuid);
-                    if (p != null) p.sendMessage(ChatColor.GOLD + "Start fighting");
+                    Player player = Bukkit.getPlayer(uuid);
+                    if (player != null) player.sendMessage(ChatColor.GOLD + "Start fighting");
                 }
                 glassRemoval();
             }
@@ -88,33 +97,60 @@ public class ReincarnationBattle extends Game implements Listener{
         countdown.start();
     }
 
+    private Location getTeamSpawn(Team team) {
+        World world = Bukkit.getWorld("reincarnation1");
+        return switch (team.getTeamName()) {
+            case "Red Nerds" -> new Location(world, -18.5, -54, 22.5, 0, 0);
+            case "Orange Nerds" -> new Location(world, -15.5, -54, -17.5, 0, 0);
+            case "Yellow Nerds" -> new Location(world, 24.5, -54, -15.5, 0, 0);
+            case "Lime Nerds" -> new Location(world, 22.5, -54, 24.5, 0, 0);
+            default -> throw new IllegalArgumentException("Unknown team: " + team.getTeamName());
+        };
+    }
+
     @Override
     public void endGame() {
         winnerCalculator();
         HandlerList.unregisterAll(kitsHandling);
         HandlerList.unregisterAll(this);
-        this.isRunning = false;
-        MenuHandler menuHandler = new MenuHandler(plugin);
-        Location spawn = new Location(Bukkit.getWorld("world"), 8.5, -56, 8.5, 0, 0);
+        isRunning = false;
+
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            for (UUID uuid : players.keySet()) {
-                PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null) {
-                    player.removeScoreboardTag("ingame");
-                    player.setHealth(20);
-                    player.setFoodLevel(20);
-                    player.setGameMode(GameMode.ADVENTURE);
-                    player.teleport(spawn);
-                    menuHandler.defaultInventory(player);
-                }
-                if (info.getTeam() != null)
-                    plugin.getTeamManager().removePlayerFromTeam(uuid, info.getTeam().getTeamName());
-                info.reset();
-            }
-            players.clear();;
+            resetPlayers();
             recreateWorld("reincarnation1");
         }, 160L);
+    }
+
+    /**
+     * Reset all the players by teleporting them back to spawn
+     */
+    private void resetPlayers() {
+        MenuHandler menuHandler = new MenuHandler(plugin);
+        Location spawn = new Location(Bukkit.getWorld("world"), 8.5, -56, 8.5, 0, 0);
+        for (UUID uuid : players.keySet()) {
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) resetPlayer(player, spawn, menuHandler);
+            if (info.getTeam() == null) return;
+            plugin.getTeamManager().removePlayerFromTeam(uuid, info.getTeam().getTeamName());
+            info.reset();
+        }
+        players.clear();
+    }
+
+    /**
+     * Reset the values of a single player
+     * @param player Player whose infos are resetting
+     * @param spawn Spawn point to tp the player
+     * @param menuHandler Menu handler object
+     */
+    private void resetPlayer(Player player, Location spawn, MenuHandler menuHandler) {
+        player.removeScoreboardTag("ingame");
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.teleport(spawn);
+        menuHandler.defaultInventory(player);
     }
 
     /**
@@ -122,88 +158,185 @@ public class ReincarnationBattle extends Game implements Listener{
      * the results
      */
     public void winnerCalculator() {
-        HashMap<Team, Integer> teamPoints = new HashMap<>();
-        for (Team team : this.teams) {
-            int currentPoints = 0;
-            for (UUID uuid : team.getPlayers()) {
-                Player player = Bukkit.getPlayer(uuid);
-                if (player != null) player.setNoDamageTicks(180);
-                PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
-                currentPoints += info.getCoins();
-            }
-            teamPoints.put(team, currentPoints);
+        Map<Team, Integer> teamPoints = calculateTeamPoints();
+        List<Map.Entry<Team, Integer>> sortedTeams = sortTeamsByPoints(teamPoints);
+        announceGameFinished();
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            displayIndividualStandings();
+            displayTeamStandings(sortedTeams);
+            playFinalSound();
+        }, 60L);
+    }
+
+    /**
+     * Calculate the amount of points scored by each team
+     * @return A list of the teams with their associated points
+     */
+    private Map<Team, Integer> calculateTeamPoints() {
+        Map<Team, Integer> teamPoints = new HashMap<>();
+        for (Team team : teams) {
+            int points = calculateTeamPoints(team);
+            teamPoints.put(team, points);
         }
+        return teamPoints;
+    }
+
+    /**
+     * Calculate the amount of points scored by a single team
+     * @param team Team whose points are going to be calculated
+     * @return Total points of a single team
+     */
+    private int calculateTeamPoints(Team team) {
+        int points = 0;
+        for (UUID uuid : team.getPlayers()) {
+            Player player = Bukkit.getPlayer(uuid);
+            if (player != null) player.setNoDamageTicks(180);
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            points += info.getCoins();
+        }
+        return points;
+    }
+
+    /**
+     * Sort the game teams by points
+     * @param teamPoints Team with their points
+     * @return Sorted teams based on their points
+     */
+    private List<Map.Entry<Team, Integer>> sortTeamsByPoints(Map<Team, Integer> teamPoints) {
+
         List<Map.Entry<Team, Integer>> sortedTeams = new ArrayList<>(teamPoints.entrySet());
+
         sortedTeams.sort(Map.Entry.<Team, Integer>comparingByValue().reversed());
+        return sortedTeams;
+    }
+
+    /**
+     * Announce the game has finished with a nice formatted message
+     */
+    private void announceGameFinished() {
         Bukkit.broadcastMessage(ChatColor.WHITE + " ");
         Bukkit.broadcastMessage(ChatColor.GOLD + "The Reincarnation Battle has finished!");
-        Bukkit.broadcastMessage(ChatColor.GOLD + "The Final Standings are... ");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "The Final Standings are...");
         Bukkit.broadcastMessage(ChatColor.WHITE + " ");
         for (Player player : Bukkit.getOnlinePlayers())
             player.playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 4.0f, 1.0f);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            // Individual player standings
-            Bukkit.broadcastMessage("");
-            Bukkit.broadcastMessage(ChatColor.GOLD + "Individual Standings:");
+    }
 
-            List<Map.Entry<UUID, Integer>> sortedPlayers = new ArrayList<>();
+    /**
+     * Display the individual standings with a good formatted message
+     */
+    private void displayIndividualStandings() {
+        Bukkit.broadcastMessage("");
+        Bukkit.broadcastMessage(ChatColor.GOLD + "Individual Standings:");
+        List<Map.Entry<UUID, Integer>> sortedPlayers = calculateIndividualStandings();
+        displayPlayers(sortedPlayers);
+        Bukkit.broadcastMessage("");
+    }
 
-            for (UUID uuid : players.keySet()) {
-                PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
-                sortedPlayers.add(Map.entry(uuid, info.getCoins()));
+    /**
+     * Create a list of players with their points and sort it
+     * @return The sorted player list
+     */
+    private List<Map.Entry<UUID, Integer>> calculateIndividualStandings() {
+        List<Map.Entry<UUID, Integer>> sortedPlayers = new ArrayList<>();
+
+        for (UUID uuid : players.keySet()) {
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            sortedPlayers.add(Map.entry(uuid, info.getCoins()));
+        }
+
+        sortedPlayers.sort(Map.Entry.<UUID, Integer>comparingByValue().reversed());
+        return sortedPlayers;
+    }
+
+    /**
+     * Print in chat the leaderboard of players and their coins
+     * @param sortedPlayers Sorted list of player
+     */
+    private void displayPlayers(List<Map.Entry<UUID, Integer>> sortedPlayers) {
+        int position = 1;
+        for (Map.Entry<UUID, Integer> entry : sortedPlayers) {
+            UUID uuid = entry.getKey();
+            int points = entry.getValue();
+            String playerName = getPlayerName(uuid);
+            Bukkit.broadcastMessage(ChatColor.WHITE + " "
+                            + position + ". " + playerName + " - " + points + " points");
+            position++;
+        }
+    }
+
+    /**
+     * Return a players name based on the id whether the player is online or not
+     * @param uuid Player id
+     * @return Player name
+     */
+    private String getPlayerName(UUID uuid) {
+        Player player = Bukkit.getPlayer(uuid);
+        if (player != null) return player.getName();
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        return offlinePlayer.getName();
+    }
+
+    /**
+     * Print in chat a leaderboard with the teams position and points
+     * @param sortedTeams List of teams final positions
+     */
+    private void displayTeamStandings(List<Map.Entry<Team, Integer>> sortedTeams) {
+        Bukkit.broadcastMessage(ChatColor.GOLD + "Team Standings:");
+        int position = 1;
+        for (Map.Entry<Team, Integer> entry : sortedTeams) {
+            Team team = entry.getKey();
+            int points = entry.getValue();
+            if (position == 1) {
+                Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: "
+                        + team.getTeamName() + " - " + points + " points!");
+                rewardWinningTeam(team);
             }
-            sortedPlayers.sort(Map.Entry.<UUID, Integer>comparingByValue().reversed());
-            int position = 1;
+            else Bukkit.broadcastMessage(team.getTeamColor() + " " + position
+                    + ". " + team.getTeamName() + " - " + points + " points");
+            position++;
+        }
+        Bukkit.broadcastMessage(ChatColor.WHITE + " ");
+    }
 
-            for (Map.Entry<UUID, Integer> entry : sortedPlayers) {
-                UUID uuid = entry.getKey();
-                int points = entry.getValue();
-                Player player = Bukkit.getPlayer(uuid);
-                if (player == null) {
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                    Bukkit.broadcastMessage(ChatColor.WHITE + " " + position + ". " + offlinePlayer.getName() + " - " + points + " points");
-                }
-                else Bukkit.broadcastMessage(ChatColor.WHITE + " " + position + ". " + player.getName() + " - " + points + " points");
-                position++;
+    /**
+     *  Add a win to each player in the team and call the fireworks spawning function
+     * @param team Winning team
+     */
+    private void rewardWinningTeam(Team team) {
+        for (UUID uuid : team.getPlayers()) {
+            PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
+            info.addWin();
+            Player player = Bukkit.getPlayer(uuid);
+
+            if (player != null) {
+                BukkitTask fireworkTask = Bukkit.getScheduler().runTaskTimer(
+                        plugin, () -> spawnWinnerFirework(player), 150L, 10L);
+                Bukkit.getScheduler().runTaskLater(plugin, fireworkTask::cancel, 190L);
             }
-            Bukkit.broadcastMessage("");
-            Bukkit.broadcastMessage(ChatColor.GOLD + "Team Standings:");
-            position = 1;
-            for (Map.Entry<Team, Integer> entry : sortedTeams) {
-                Team team = entry.getKey();
-                int points = entry.getValue();
-                if (position == 1) {
-                    Bukkit.broadcastMessage(team.getTeamColor() + "🏆 1st Place: " + team.getTeamName() + " - " + points + " points!");
-                    for (UUID uuid : team.getPlayers()) {
-                        Player player = Bukkit.getPlayer(uuid);
-                        PlayerInfo info = plugin.getPlayerManager().getPlayer(uuid);
-                        info.addWin();
-                        if (player != null) {
-                            BukkitTask fireworkTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-                                if (!player.isOnline()) return;
+        }
+    }
 
-                                Firework firework = player.getWorld().spawn(
-                                        player.getLocation().add(0, 1, 0), Firework.class);
+    /**
+     * Shoot some fireworks dealing no damage coming from the winners to celebrate
+     * @param player Player from which fireworks will spawn
+     */
+    private void spawnWinnerFirework(Player player) {
+        if (!player.isOnline()) return;
+        Firework firework = player.getWorld().spawn(
+                player.getLocation().add(0, 1, 0), Firework.class);
+        FireworkMeta meta = firework.getFireworkMeta();
+        meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE).
+                withColor(Color.YELLOW).withColor(Color.WHITE).flicker(true).trail(true).build());
+        meta.setPower(0);
+        firework.setFireworkMeta(meta);
+    }
 
-                                FireworkMeta meta = firework.getFireworkMeta();
-                                meta.addEffect(FireworkEffect.builder().with(FireworkEffect.Type.BALL_LARGE)
-                                        .withColor(Color.YELLOW).withColor(Color.WHITE)
-                                        .flicker(true).trail(true).build());
-                                meta.setPower(0);
-                                firework.setFireworkMeta(meta);
-                            }, 150L, 10L);
-                            Bukkit.getScheduler().runTaskLater(plugin, fireworkTask::cancel, 190L);
-                        }
-                    }
-                }
-                else Bukkit.broadcastMessage(team.getTeamColor() + " " + position + ". " + team.getTeamName() + " - " + points + " points");
-                position++;
-            }
-            Bukkit.broadcastMessage(ChatColor.WHITE + " ");
-            for (Player player : Bukkit.getOnlinePlayers())
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1.0f, 1.0f);
-        }, 60L);
-
+    private void playFinalSound() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.playSound(player.getLocation(),
+                    Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1.0f, 1.0f);
+        }
     }
 
     /**
