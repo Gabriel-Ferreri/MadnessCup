@@ -164,7 +164,10 @@ public class ReincarnationBattle extends Game implements Listener{
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
             displayIndividualStandings();
             displayTeamStandings(sortedTeams);
-            playFinalSound();
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.playSound(player.getLocation(),
+                        Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1.0f, 1.0f);
+            }
         }, 60L);
     }
 
@@ -330,13 +333,6 @@ public class ReincarnationBattle extends Game implements Listener{
                 withColor(Color.YELLOW).withColor(Color.WHITE).flicker(true).trail(true).build());
         meta.setPower(0);
         firework.setFireworkMeta(meta);
-    }
-
-    private void playFinalSound() {
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            player.playSound(player.getLocation(),
-                    Sound.BLOCK_NOTE_BLOCK_IMITATE_ENDER_DRAGON, 1.0f, 1.0f);
-        }
     }
 
     /**
